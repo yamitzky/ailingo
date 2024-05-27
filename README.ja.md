@@ -1,6 +1,23 @@
-# ailingo: 生成AIを使った、ローカルファイル翻訳のためのCLIツール
+# ailingo: 生成AI(LLM)を使った、ローカルファイル翻訳のためのCLIツール
 
 **ailingo** は、生成AIを利用してローカルファイルを様々な言語に翻訳するコマンドラインインターフェース(CLI)ツールです。
+
+<p align="center">
+    <a href="https://github.com/yamitzky/ailingo/releases" target="_blank">
+        <img alt="Releases" src="https://img.shields.io/github/v/release/yamitzky/ailingo"></a>
+    <a href="https://github.com/yamitzky/ailingo/actions/workflows/check_diffs.yml" target="_blank">
+        <img alt="CI" src="https://github.com/yamitzky/ailingo/actions/workflows/lint.yml/badge.svg"></a>
+    <a href="https://opensource.org/licenses/MIT" target="_blank">
+        <img alt="MIT License" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
+</p>
+
+<p align="center">
+  <a href="./README.md">English</a> |
+  <a href="./README.ja.md">日本語</a> |
+  <a href="./README.zh-CN.md">简体中文</a> |
+  <a href="./README.zh-TW.md">繁体中文</a> |
+  <a href="./README.es.md">Español</a> |
+</p>
 
 ## 概要
 
@@ -22,9 +39,17 @@
 
 - Python 3.11
 
-### 手順:
+## Quick Start:
 
-1. **litellmのセットアップ:**
+```bash
+export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
+pip install ailingo
+ailingo my_document.txt --target ja
+```
+
+### 詳細なセットアップ手順:
+
+#### 1. litellmのセットアップ:
 
 このプログラムは、生成AIにアクセスするためにLiteLLMを使用しています。LiteLLMは、様々なプロバイダーと連携するように設計されています。使用する生成AIモデルのプロバイダーでアカウントを作成し、APIキーを取得してください。
 
@@ -43,7 +68,7 @@ export VERTEXAI_LOCATION="us-central1"
 export ANTHROPIC_API_KEY="YOUR_ANTHROPIC_API_KEY"
 ```
 
-2. **ailingoのインストール:**
+#### 2. ailingoのインストール:
 
 ```bash
 pip install ailingo
@@ -63,7 +88,7 @@ pip install 'ailingo[all]'
 ailingo <ファイルパス> --target <翻訳先言語>
 ```
 
-**例:**
+### 例:
 
 ```bash
 ailingo my_document.txt --target ja

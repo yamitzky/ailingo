@@ -1,1 +1,2 @@
-ailingo README.ja.md -t en -m gemini-1.5-pro -o '{parent}/README{suffix}' -y
+ailingo README.ja.md -s ja -t en -o '{parent}/README{suffix}' -y
+ailingo README.ja.md -s ja -t zh-CN,zh-TW,es -y

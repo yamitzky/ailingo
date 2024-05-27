@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "ailingo"
-version = "0.1.0"
-description = "A CLI Tool for Local File Translation"
+version = "0.1.1"
+description = "A CLI Tool for Local File Translation Using Generative AI(LLMs)"
 authors = ["Mitsuki Ogasahara <negiga@gmail.com>"]
 license = "MIT License"
 readme = "README.md"
