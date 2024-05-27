@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "transpa"
+name = "ailingo"
 version = "0.1.0"
 description = "A CLI Tool for Local File Translation"
 authors = ["Mitsuki Ogasahara <negiga@gmail.com>"]
@@ -31,4 +31,4 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-transpa = "transpa.cli:app"
+ailingo = "ailingo.cli:app"

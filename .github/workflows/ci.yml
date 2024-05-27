@@ -25,7 +25,7 @@ jobs:
       - name: Type check with pyright
         run: poetry run pyright
       - name: Test with pytest
-        run: poetry run pytest --cov=transpa --cov-report=xml
+        run: poetry run pytest --cov=ailingo --cov-report=xml
 
   build-and-publish:
     needs: build

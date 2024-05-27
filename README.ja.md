@@ -1,8 +1,8 @@
-## transpa: 生成AIを使った、ローカルファイル翻訳のためのCLIツール
+# ailingo: 生成AIを使った、ローカルファイル翻訳のためのCLIツール
 
-**transpa** は、生成AIを利用してローカルファイルを様々な言語に翻訳するコマンドラインインターフェース(CLI)ツールです。
+**ailingo** は、生成AIを利用してローカルファイルを様々な言語に翻訳するコマンドラインインターフェース(CLI)ツールです。
 
-### 概要
+## 概要
 
 開発者、翻訳者、コンテンツ制作者がファイルを効率的に多言語化できるように設計されています。
 
@@ -16,13 +16,13 @@
 - **書き換えモード**: スペル/文法修正を行って同じ言語でテキストを書き直したり、リクエストに応じて文体を調整したりできます。
 - **エディターモード**: エディターでテキストを直接翻訳できます。
 
-### インストール
+## インストール
 
-**前提条件:**
+### 前提条件:
 
 - Python 3.11
 
-**手順:**
+### 手順:
 
 1. **litellmのセットアップ:**
 
@@ -43,38 +43,38 @@ export VERTEXAI_LOCATION="us-central1"
 export ANTHROPIC_API_KEY="YOUR_ANTHROPIC_API_KEY"
 ```
 
-2. **transpaのインストール:**
+2. **ailingoのインストール:**
 
 ```bash
-pip install transpa
+pip install ailingo
 # VertexAI(Geminiなど)を使う場合
-pip install 'transpa[google]'
+pip install 'ailingo[google]'
 # AWS(Bedrock)を使う場合
-pip install 'transpa[aws]'
+pip install 'ailingo[aws]'
 # または、全ての依存をインストール
-pip install 'transpa[all]'
+pip install 'ailingo[all]'
 ```
 
-### 使い方
+## 使い方
 
-**基本的な翻訳:**
+### 基本的な翻訳:
 
 ```bash
-transpa <ファイルパス> --target <翻訳先言語>
+ailingo <ファイルパス> --target <翻訳先言語>
 ```
 
 **例:**
 
 ```bash
-transpa my_document.txt --target ja
+ailingo my_document.txt --target ja
 ```
 
 これは `my_document.txt` を日本語に翻訳し、`my_document.ja.txt` として保存します。デフォルトでは、同じフォルダ内に`{stem}.{target}{suffix}` 形式で保存されます。
 
-**翻訳元言語指定によるファイル名推定:**
+### 翻訳元言語指定によるファイル名推定:
 
 ```bash
-transpa /path/to/en/my_document.txt --source en --target ja
+ailingo /path/to/en/my_document.txt --source en --target ja
 ```
 
 これは `my_document.txt` を日本語に翻訳し、 `/path/to/ja/my_document.txt` として保存します。この機能は、ファイル名やディレクトリ名に翻訳元言語コードが含まれている場合、それを翻訳先言語コードに置き換えます。
@@ -84,36 +84,36 @@ transpa /path/to/en/my_document.txt --source en --target ja
 
 注意: `--output` オプションで出力先ファイル名のパターンを指定した場合、この自動推定は適用されません。
 
-**複数のファイルと翻訳先言語:**
+### 複数のファイルと翻訳先言語:
 
 ```bash
-transpa file1.txt file2.html --target ja,es,fr
+ailingo file1.txt file2.html --target ja,es,fr
 ```
 
 これは `file1.txt` と `file2.html` を日本語、スペイン語、フランス語に翻訳します。
 
-**追加の翻訳リクエストの指定:**
+### 追加の翻訳リクエストの指定:
 
 ```bash
-transpa my_document.txt --target de --request "間にジョークを交えながら、なるべく砕けた表現にしてください"
+ailingo my_document.txt --target de --request "間にジョークを交えながら、なるべく砕けた表現にしてください"
 ```
 
 これは `my_document.txt` をドイツ語に翻訳する際に、ジョークを交えた砕けた表現にするようにリクエストします。
 
-**リライトモード: 同じ言語で文体を修正**
+### リライトモード: 同じ言語で文体を修正
 
 ```bash
-transpa my_document.txt
+ailingo my_document.txt
 ```
 
 翻訳先言語を指定しない場合、既存の `my_document.txt` を同じ言語でリライトします。他のオプションは、翻訳時と同様に指定できます。
 
 デフォルトでは、スペルミスや文法ミスを修正しますが、 `--request` オプションを使用して、より具体的なリクエストを追加することも可能です。
 
-**エディターモード: ファイルを指定せずに翻訳**
+### エディターモード: ファイルを指定せずに翻訳
 
 ```bash
-transpa -e
+ailingo -e
 ```
 
 エディターモードでは、一時ファイルをエディタ（デフォルトはvi）で開き、手動で編集してから翻訳を実行できます。編集後、保存された内容が翻訳に使用されます。
@@ -124,24 +124,24 @@ transpa -e
 - `--request` で文体の修正リクエストを追加できます。
 - デフォルトでは翻訳結果は標準出力に表示されますが、 `--output` で出力先ファイルを指定できます。
 
-**生成AIモデルの指定:**
+### 生成AIモデルの指定:
 
 ```bash
-transpa my_document.txt --target de --model gemini-1.5-pro
+ailingo my_document.txt --target de --model gemini-1.5-pro
 ```
 
 これは `my_document.txt` をGoogle Gemini Proを使用してドイツ語に翻訳します。
 
-**出力ファイル名のカスタマイズ:**
+### 出力ファイル名のカスタマイズ:
 
 ```bash
-transpa my_document.txt --target es --output "{parent}/{stem}_translated.{target}{suffix}"
+ailingo my_document.txt --target es --output "{parent}/{stem}_translated.{target}{suffix}"
 ```
 
 これは `my_document.txt` をスペイン語に翻訳し、`my_document_translated.es.txt` として保存します。
 
 ```bash
-transpa /path/to/en/my_document.txt --target ja --output "{parents[1]}/{target}/{name}"
+ailingo /path/to/en/my_document.txt --target ja --output "{parents[1]}/{target}/{name}"
 ```
 
 これは `path/to/en/my_document.txt` を日本語に翻訳し、`path/to/ja/my_document.txt` として保存します。
@@ -161,18 +161,18 @@ transpa /path/to/en/my_document.txt --target ja --output "{parents[1]}/{target}/
 
 その他の変数については[Pathlib](https://docs.python.org/3/library/pathlib.html#methods-and-properties)のドキュメントを参照してください。
 
-**詳細なオプション:**
+### 詳細なオプション:
 
 より高度な使用方法については、ヘルプコマンドを使用してください。
 
 ```bash
-transpa --help
+ailingo --help
 ```
 
-### ライセンス
+## ライセンス
 
 このプロジェクトは、MITライセンスの下で配布されています。
 
-### 免責事項
+## 免責事項
 
 このツールは生成AIを利用していますが、翻訳の品質は選択したAIモデルや入力テキストによって異なります。 翻訳結果をレビューし、必要に応じて修正することをお勧めします。

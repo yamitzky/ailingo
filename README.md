@@ -1,6 +1,6 @@
-## transpa: A CLI Tool for Local File Translation Using Generative AI
+## ailingo: A CLI Tool for Local File Translation Using Generative AI
 
-**transpa** is a command-line interface (CLI) tool that utilizes the power of generative AI to translate local files into various languages.
+**ailingo** is a command-line interface (CLI) tool that utilizes the power of generative AI to translate local files into various languages.
 
 ### Overview
 
@@ -43,16 +43,16 @@ export VERTEXAI_LOCATION="us-central1"
 export ANTHROPIC_API_KEY="YOUR_ANTHROPIC_API_KEY"
 ```
 
-2. **Installing transpa:**
+2. **Installing ailingo:**
 
 ```bash
-pip install transpa
+pip install ailingo
 # To use VertexAI (e.g., Gemini)
-pip install 'transpa[google]'
+pip install 'ailingo[google]'
 # To use AWS (Bedrock)
-pip install 'transpa[aws]'
+pip install 'ailingo[aws]'
 # Or install all dependencies
-pip install 'transpa[all]'
+pip install 'ailingo[all]'
 ```
 
 ### Usage
@@ -60,13 +60,13 @@ pip install 'transpa[all]'
 **Basic translation:**
 
 ```bash
-transpa <file_path> --target <target_language>
+ailingo <file_path> --target <target_language>
 ```
 
 **Example:**
 
 ```bash
-transpa my_document.txt --target ja
+ailingo my_document.txt --target ja
 ```
 
 This translates `my_document.txt` into Japanese and saves it as `my_document.ja.txt`. By default, it saves the translated file in the same folder in the format `{stem}.{target}{suffix}`.
@@ -74,7 +74,7 @@ This translates `my_document.txt` into Japanese and saves it as `my_document.ja.
 **Filename estimation by specifying the source language:**
 
 ```bash
-transpa /path/to/en/my_document.txt --source en --target ja
+ailingo /path/to/en/my_document.txt --source en --target ja
 ```
 
 This translates `my_document.txt` into Japanese and saves it as `/path/to/ja/my_document.txt`. This feature replaces the source language code with the target language code when the file name or directory name contains the source language code.
@@ -87,7 +87,7 @@ Note: If you specify the output file name pattern with the `--output` option, th
 **Multiple files and target languages:**
 
 ```bash
-transpa file1.txt file2.html --target ja,es,fr
+ailingo file1.txt file2.html --target ja,es,fr
 ```
 
 This translates `file1.txt` and `file2.html` into Japanese, Spanish, and French.
@@ -95,7 +95,7 @@ This translates `file1.txt` and `file2.html` into Japanese, Spanish, and French.
 **Adding a translation request:**
 
 ```bash
-transpa my_document.txt --target de --request "Please translate with a casual tone, including jokes."
+ailingo my_document.txt --target de --request "Please translate with a casual tone, including jokes."
 ```
 
 This translates `my_document.txt` into German with a casual tone, including jokes.
@@ -103,7 +103,7 @@ This translates `my_document.txt` into German with a casual tone, including joke
 **Rewrite mode: Correcting spelling/grammar or adjusting writing style**
 
 ```bash
-transpa my_document.txt 
+ailingo my_document.txt 
 ```
 
 If you don't specify the target language, it will rewrite the existing `my_document.txt` in the same language. You can specify other options in the same way as for translation.
@@ -113,7 +113,7 @@ By default, it will correct spelling and grammar errors, but you can add more sp
 **Editor mode: Translate without specifying a file**
 
 ```bash
-transpa -e
+ailingo -e
 ```
 
 In editor mode, a temporary file is opened in an editor (default: vi), allowing you to manually edit the text before translation. After saving, the content will be translated.
@@ -127,7 +127,7 @@ You can combine other options with editor mode.
 **Specifying the generative AI model:**
 
 ```bash
-transpa my_document.txt --target de --model gemini-1.5-pro
+ailingo my_document.txt --target de --model gemini-1.5-pro
 ```
 
 This translates `my_document.txt` into German using Google Gemini Pro.
@@ -135,13 +135,13 @@ This translates `my_document.txt` into German using Google Gemini Pro.
 **Customizing the output file name:**
 
 ```bash
-transpa my_document.txt --target es --output "{parent}/{stem}_translated.{target}{suffix}"
+ailingo my_document.txt --target es --output "{parent}/{stem}_translated.{target}{suffix}"
 ```
 
 This translates `my_document.txt` into Spanish and saves it as `my_document_translated.es.txt`.
 
 ```bash
-transpa /path/to/en/my_document.txt --target ja --output "{parents[1]}/{target}/{name}"
+ailingo /path/to/en/my_document.txt --target ja --output "{parents[1]}/{target}/{name}"
 ```
 
 This translates `path/to/en/my_document.txt` into Japanese and saves it as `path/to/ja/my_document.txt`.
@@ -166,7 +166,7 @@ For other properties, please refer to the [Pathlib documentation](https://docs.p
 For more advanced usage, please use the help command:
 
 ```bash
-transpa --help
+ailingo --help
 ```
 
 ### License

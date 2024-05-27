@@ -1,6 +1,6 @@
 おいおい、ファイル翻訳してくれるってマジ？ 🎉  ファイル投げるから、頑張って翻訳してくれよな！😤
 
-**transpa** は、AIの力を借りて、ローカルのファイルを色んな言語に翻訳してくれるコマンドラインツールだぜ。
+**ailingo** は、AIの力を借りて、ローカルのファイルを色んな言語に翻訳してくれるコマンドラインツールだぜ。
 
 ### なにがすごいの？
 
@@ -42,16 +42,16 @@ export VERTEXAI_LOCATION="us-central1"
 export ANTHROPIC_API_KEY="YOUR_ANTHROPIC_API_KEY"
 ```
 
-2. **transpaのインストール:**
+2. **ailingoのインストール:**
 
 ```bash
-pip install transpa
+pip install ailingo
 # VertexAI (例: Gemini)を使う場合
-pip install 'transpa[google]'
+pip install 'ailingo[google]'
 # AWS (Bedrock)を使う場合
-pip install 'transpa[aws]'
+pip install 'ailingo[aws]'
 # すべての依存関係をインストールする場合
-pip install 'transpa[all]'
+pip install 'ailingo[all]'
 ```
 
 ### 使い方
@@ -59,13 +59,13 @@ pip install 'transpa[all]'
 **基本的な翻訳:**
 
 ```bash
-transpa <file_path> --target <target_language>
+ailingo <file_path> --target <target_language>
 ```
 
 **例:**
 
 ```bash
-transpa my_document.txt --target ja
+ailingo my_document.txt --target ja
 ```
 
 これは`my_document.txt`を日本語に翻訳し、`my_document.ja.txt`というファイル名で保存する。 デフォルトでは、翻訳後のファイルは同じフォルダに`{stem}.{target}{suffix}`という形式のファイル名で保存される。
@@ -73,7 +73,7 @@ transpa my_document.txt --target ja
 **ソース言語を指定してファイル名を推測:**
 
 ```bash
-transpa /path/to/en/my_document.txt --source en --target ja
+ailingo /path/to/en/my_document.txt --source en --target ja
 ```
 
 これは`my_document.txt`を日本語に翻訳し、`/path/to/ja/my_document.txt`というファイル名で保存する。 この機能は、ファイル名またはディレクトリ名にソース言語コードが含まれている場合、ソース言語コードをターゲット言語コードに置き換えるんだ。
@@ -86,7 +86,7 @@ transpa /path/to/en/my_document.txt --source en --target ja
 **複数のファイルとターゲット言語:**
 
 ```bash
-transpa file1.txt file2.html --target ja,es,fr
+ailingo file1.txt file2.html --target ja,es,fr
 ```
 
 これは`file1.txt`と`file2.html`を日本語、スペイン語、フランス語に翻訳する。
@@ -94,7 +94,7 @@ transpa file1.txt file2.html --target ja,es,fr
 **翻訳のリクエストを追加:**
 
 ```bash
-transpa my_document.txt --target de --request "冗談を交えてカジュアルな口調で翻訳してください。"
+ailingo my_document.txt --target de --request "冗談を交えてカジュアルな口調で翻訳してください。"
 ```
 
 これは`my_document.txt`をドイツ語に翻訳するんだけど、冗談を交えつつ、カジュアルな口調で翻訳してくれる。
@@ -102,7 +102,7 @@ transpa my_document.txt --target de --request "冗談を交えてカジュアル
 **リライトモード: スペル/文法の修正または文体の調整**
 
 ```bash
-transpa my_document.txt 
+ailingo my_document.txt 
 ```
 
 ターゲット言語を指定しないと、既存の`my_document.txt`を同じ言語で書き直してくれる。 翻訳の場合と同じように、他のオプションも指定できる。
@@ -112,7 +112,7 @@ transpa my_document.txt
 **生成AIモデルの指定:**
 
 ```bash
-transpa my_document.txt --target de --model gemini-1.5-pro
+ailingo my_document.txt --target de --model gemini-1.5-pro
 ```
 
 これはGoogle Gemini Proを使って`my_document.txt`をドイツ語に翻訳する。
@@ -120,13 +120,13 @@ transpa my_document.txt --target de --model gemini-1.5-pro
 **出力ファイル名のカスタマイズ:**
 
 ```bash
-transpa my_document.txt --target es --output "{parent}/{stem}_translated.{target}{suffix}"
+ailingo my_document.txt --target es --output "{parent}/{stem}_translated.{target}{suffix}"
 ```
 
 これは`my_document.txt`をスペイン語に翻訳し、`my_document_translated.es.txt`というファイル名で保存する。
 
 ```bash
-transpa /path/to/en/my_document.txt --target ja --output "{parents[1]}/{target}/{name}"
+ailingo /path/to/en/my_document.txt --target ja --output "{parents[1]}/{target}/{name}"
 ```
 
 これは`path/to/en/my_document.txt`を日本語に翻訳し、`path/to/ja/my_document.txt`というファイル名で保存する。
@@ -151,7 +151,7 @@ transpa /path/to/en/my_document.txt --target ja --output "{parents[1]}/{target}/
 もっと使いこなしたい場合は、ヘルプコマンドを使ってみてくれ。
 
 ```bash
-transpa --help
+ailingo --help
 ```
 
 ### ライセンス

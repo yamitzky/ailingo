@@ -15,26 +15,26 @@ This fancy CLI tool uses AI magic to translate your files into a bunch of langua
     - This program uses LiteLLM to connect with AI models. Grab an API key from your favorite AI provider. It's like getting a backstage pass to the AI party!
     - Need help setting up LiteLLM? Check out their [documentation](https://docs.litellm.ai/docs/providers). Don't worry, it's not as scary as it sounds. 
 
-* **Step 2: Time to install transpa:**
+* **Step 2: Time to install ailingo:**
     - Open your terminal and type this magic spell:
 
         ```bash
-        pip install transpa
+        pip install ailingo
         ```
     - Want to use Google Gemini? Type this instead:
 
         ```bash
-        pip install 'transpa[google]'
+        pip install 'ailingo[google]'
         ```
     - Feeling adventurous with AWS (Bedrock)? Use this one:
 
         ```bash
-        pip install 'transpa[aws]'
+        pip install 'ailingo[aws]'
         ```
     - Can't decide and want it all? We got you:
 
         ```bash
-        pip install 'transpa[all]'
+        pip install 'ailingo[all]'
         ```
 
 **Now for the fun part - using this thing!**
@@ -42,38 +42,38 @@ This fancy CLI tool uses AI magic to translate your files into a bunch of langua
 * **Basic translation - keep it simple:**
 
     ```bash
-    transpa <file_path> --target <target_language>
+    ailingo <file_path> --target <target_language>
     ```
     **Example:**
     ```bash
-    transpa my_document.txt --target ja
+    ailingo my_document.txt --target ja
     ```
     This will magically translate your "my_document.txt" file into Japanese and save it as "my_document.ja.txt".  Easy peasy! 
 
 * **Translate multiple files and languages like a pro:**
 
     ```bash
-    transpa file1.txt file2.html --target ja,es,fr
+    ailingo file1.txt file2.html --target ja,es,fr
     ```
     This translates "file1.txt" and "file2.html" into Japanese, Spanish, and French. Show off those language skills!
 
 * **Want your translation to sound like you? No problem!**
 
     ```bash
-    transpa my_document.txt --target de --request "Please translate with a casual tone, including jokes."
+    ailingo my_document.txt --target de --request "Please translate with a casual tone, including jokes."
     ```
    This translates "my_document.txt" into German, but with a casual vibe and maybe even a dad joke or two.  
 
 * **Fix those typos and spice up your writing:**
     ```bash
-    transpa my_document.txt 
+    ailingo my_document.txt 
     ```
     This will magically fix any grammar errors and make your writing shine. It's like having a personal editor, but without the judgmental stares. 
 
 * **Feeling powerful? Customize those output file names:**
 
     ```bash
-    transpa my_document.txt --target es --output "{parent}/{stem}_translated.{target}{suffix}"
+    ailingo my_document.txt --target es --output "{parent}/{stem}_translated.{target}{suffix}"
     ```
     This translates "my_document.txt" into Spanish and saves it as "my_document_translated.es.txt" because you're all about that organization.
 
@@ -82,7 +82,7 @@ This fancy CLI tool uses AI magic to translate your files into a bunch of langua
 Type this in your terminal and unleash the full potential of this tool:
 
     ```bash
-    transpa --help
+    ailingo --help
     ```
 
 **Important Stuff:**

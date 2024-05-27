@@ -3,10 +3,9 @@ import subprocess
 import tempfile
 
 import typer
+from ailingo.translator import DEFAULT_OUTPUT_PATTERN, Translator
 from rich import print
 from rich.console import Console
-
-from transpa.translator import DEFAULT_OUTPUT_PATTERN, Translator
 
 app = typer.Typer()
 

@@ -1,9 +1,8 @@
 from unittest.mock import MagicMock, call, patch
 
+from ailingo.cli import app
+from ailingo.translator import Translator
 from typer.testing import CliRunner
-
-from transpa.cli import app
-from transpa.translator import Translator
 
 runner = CliRunner()
 
@@ -18,7 +17,7 @@ def mock_translate(*args, **kwargs):
         f.write("Translated content.")
 
 
-@patch("transpa.cli.Translator")
+@patch("ailingo.cli.Translator")
 def test_translate_command(mock_translator):
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
@@ -51,7 +50,7 @@ def test_translate_command(mock_translator):
     mock_translator.assert_called_once_with(model_name="gpt-4o")
 
 
-@patch("transpa.cli.Translator")
+@patch("ailingo.cli.Translator")
 def test_translate_multiple_files(mock_translator):
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
@@ -120,7 +119,7 @@ def test_translate_multiple_files(mock_translator):
     mock_translator.assert_called_once_with(model_name="gemini-1.5-pro")
 
 
-@patch("transpa.cli.Translator")
+@patch("ailingo.cli.Translator")
 def test_rewrite_mode(mock_translator):
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
@@ -165,7 +164,7 @@ def test_rewrite_mode(mock_translator):
 
 
 @patch.object(Translator, "translate", side_effect=mock_translate)
-@patch("transpa.cli.subprocess.run", side_effect=mock_subprocess_run)
+@patch("ailingo.cli.subprocess.run", side_effect=mock_subprocess_run)
 def test_translate_edit_mode(mock_translator, mock_run_editor, tmp_path):
     result = runner.invoke(app, ["-e"])
     assert result.exit_code == 0
@@ -192,7 +191,7 @@ def test_translate_edit_mode_with_file_argument(tmp_path):
     assert "File paths cannot be specified in edit mode." in result.output
 
 
-@patch("transpa.cli.subprocess.run", side_effect=mock_subprocess_run)
+@patch("ailingo.cli.subprocess.run", side_effect=mock_subprocess_run)
 def test_translate_editor_no_changes(mock_run):
     with patch("os.path.getsize", return_value=0):
         result = runner.invoke(app, ["-e"])

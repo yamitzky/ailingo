@@ -1,6 +1,5 @@
 import pytest
-
-from transpa.file_manager import FileManager
+from ailingo.file_manager import FileManager
 
 
 @pytest.fixture

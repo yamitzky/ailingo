@@ -1,12 +1,11 @@
 from pathlib import Path
 
+from ailingo.file_manager import FileManager
+from ailingo.llm import LLM
+from ailingo.utils import setup_logger
 from rich import print
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.prompt import Confirm
-
-from transpa.file_manager import FileManager
-from transpa.llm import LLM
-from transpa.utils import setup_logger
 
 logger = setup_logger(__name__)
 

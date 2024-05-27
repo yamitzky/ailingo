@@ -1,10 +1,9 @@
 from unittest.mock import MagicMock, call, patch
 
 import pytest
-
-from transpa.file_manager import FileManager
-from transpa.llm import LLM
-from transpa.translator import Translator
+from ailingo.file_manager import FileManager
+from ailingo.llm import LLM
+from ailingo.translator import Translator
 
 
 @pytest.fixture
