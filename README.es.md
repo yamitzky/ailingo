@@ -16,7 +16,7 @@
   <a href="./README.ja.md">日本語</a> |
   <a href="./README.zh-CN.md">简体中文</a> |
   <a href="./README.zh-TW.md">繁体中文</a> |
-  <a href="./README.es.md">Español</a> |
+  <a href="./README.es.md">Español</a>
 </p>
 
 NOTICE: Este documento fue generado automáticamente usando ailingo.
