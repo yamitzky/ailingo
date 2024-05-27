@@ -14,6 +14,7 @@ This tool is designed to help developers, translators, and content creators effi
 - **Customizable output:** Control the name and location of the translated files.
 - **Additional translation requests**: You can add requests for nuances in translation, such as a casual tone.
 - **Rewrite mode**: You can rewrite the text in the same language with spell/grammar correction or adjust the writing style with a request.
+- **Editor mode**: You can translate text directly in an editor.
 
 ### Installation
 
@@ -108,6 +109,20 @@ transpa my_document.txt
 If you don't specify the target language, it will rewrite the existing `my_document.txt` in the same language. You can specify other options in the same way as for translation.
 
 By default, it will correct spelling and grammar errors, but you can add more specific requests using the `--request` option.
+
+**Editor mode: Translate without specifying a file**
+
+```bash
+transpa -e
+```
+
+In editor mode, a temporary file is opened in an editor (default: vi), allowing you to manually edit the text before translation. After saving, the content will be translated.
+
+You can combine other options with editor mode.
+
+- Specify the target language with `--target`.
+- Add a request for adjusting writing style with `--request`.
+- By default, the translation result is printed to standard output, but you can specify an output file with `--output`.
 
 **Specifying the generative AI model:**
 
