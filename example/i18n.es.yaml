@@ -1,0 +1,41 @@
+es:
+  login:
+    title: 'Iniciar sesión'
+    username: 'Nombre de usuario'
+    password: 'Contraseña'
+    button: 'Iniciar sesión'
+    forgot_password: '¿Olvidaste tu contraseña?'
+  signup:
+    title: 'Registrarse'
+    username: 'Nombre de usuario'
+    email: 'Correo electrónico'
+    password: 'Contraseña'
+    confirm_password: 'Confirmar contraseña'
+    button: 'Registrarse'
+  profile:
+    title: 'Perfil'
+    edit_button: 'Editar perfil'
+    followers: 'Seguidores'
+    following: 'Siguiendo'
+    posts: 'Publicaciones'
+  post:
+    title: 'Crear publicación'
+    content: 'Contenido'
+    button: 'Publicar'
+  messages:
+    title: 'Mensajes'
+    new_message: 'Nuevo mensaje'
+    send_button: 'Enviar'
+  notifications:
+    title: 'Notificaciones'
+    no_notifications: 'No hay notificaciones nuevas'
+  settings:
+    title: 'Configuración'
+    account: 'Cuenta'
+    privacy: 'Privacidad'
+    notifications: 'Notificaciones'
+    language: 'Idioma'
+  errors:
+    required_field: 'Este campo es obligatorio'
+    invalid_email: 'Dirección de correo electrónico inválida'
+    passwords_do_not_match: 'Las contraseñas no coinciden'

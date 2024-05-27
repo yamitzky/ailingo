@@ -1,0 +1,41 @@
+[ja.login]
+title = "ログイン"
+username = "ユーザー名"
+password = "パスワード"
+button = "ログイン"
+forgot_password = "パスワードを忘れましたか？"
+[ja.signup]
+title = "サインアップ"
+username = "ユーザー名"
+email = "メールアドレス"
+password = "パスワード"
+confirm_password = "パスワードの確認"
+button = "サインアップ"
+[ja.profile]
+title = "プロフィール"
+edit_button = "プロフィールを編集"
+followers = "フォロワー"
+following = "フォロー中"
+posts = "投稿"
+[ja.post]
+title = "投稿を作成"
+content = "内容"
+button = "投稿"
+[ja.messages]
+title = "メッセージ"
+new_message = "新しいメッセージ"
+send_button = "送信"
+[ja.notifications]
+title = "通知"
+no_notifications = "新しい通知はありません"
+[ja.settings]
+title = "設定"
+account = "アカウント"
+privacy = "プライバシー"
+notifications = "通知"
+language = "言語"
+[ja.errors]
+required_field = "このフィールドは必須です"
+invalid_email = "無効なメールアドレスです"
+passwords_do_not_match = "パスワードが一致しません"
+

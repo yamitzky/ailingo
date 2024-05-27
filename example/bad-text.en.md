@@ -1,0 +1,1 @@
+Spent the morning researching how to internationalize a Python program. Seems like gettext is the standard method. It uses {language}/LC_MESSAGES/{domain}.mo files. It's quite different from i18n in React, which is interesting.

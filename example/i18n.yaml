@@ -1,0 +1,42 @@
+# original
+en:
+  login:
+    title: 'Login'
+    username: 'Username'
+    password: 'Password'
+    button: 'Log In'
+    forgot_password: 'Forgot your password?'
+  signup:
+    title: 'Sign Up'
+    username: 'Username'
+    email: 'Email'
+    password: 'Password'
+    confirm_password: 'Confirm Password'
+    button: 'Sign Up'
+  profile:
+    title: 'Profile'
+    edit_button: 'Edit Profile'
+    followers: 'Followers'
+    following: 'Following'
+    posts: 'Posts'
+  post:
+    title: 'Create Post'
+    content: 'Content'
+    button: 'Post'
+  messages:
+    title: 'Messages'
+    new_message: 'New Message'
+    send_button: 'Send'
+  notifications:
+    title: 'Notifications'
+    no_notifications: 'No new notifications'
+  settings:
+    title: 'Settings'
+    account: 'Account'
+    privacy: 'Privacy'
+    notifications: 'Notifications'
+    language: 'Language'
+  errors:
+    required_field: 'This field is required'
+    invalid_email: 'Invalid email address'
+    passwords_do_not_match: 'Passwords do not match'
