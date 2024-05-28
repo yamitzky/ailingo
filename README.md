@@ -19,11 +19,9 @@
   <a href="./README.es.md">Español</a>
 </p>
 
-
-
-https://github.com/yamitzky/ailingo/assets/623449/cb6b6841-2c64-4905-8b71-c4e40223d4c7
-
-
+<p align="center">
+    <img alt="example" src="https://github.com/yamitzky/ailingo/assets/623449/faae1265-9ab6-4df5-a787-23e73fff9778">
+</p>
 
 NOTICE: This document was automatically generated using ailingo.
 
