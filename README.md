@@ -19,6 +19,12 @@
   <a href="./README.es.md">Español</a>
 </p>
 
+
+
+https://github.com/yamitzky/ailingo/assets/623449/cb6b6841-2c64-4905-8b71-c4e40223d4c7
+
+
+
 NOTICE: This document was automatically generated using ailingo.
 
 ## Overview
