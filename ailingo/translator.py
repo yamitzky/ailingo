@@ -1,13 +1,13 @@
 from pathlib import Path
+from logging import getLogger
 
 from ailingo.file_manager import FileManager
 from ailingo.llm import LLM
-from ailingo.utils import setup_logger
 from rich import print
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.prompt import Confirm
 
-logger = setup_logger(__name__)
+logger = getLogger(__name__)
 
 
 DEFAULT_OUTPUT_PATTERN = "{parent}/{stem}.{target}{suffix}"
@@ -22,6 +22,7 @@ class Translator:
     ) -> None:
         self.file_manager = file_manager or FileManager()
         self.llm = llm or LLM(model_name)
+        self.model_name = model_name
 
     def translate(
         self,
@@ -177,9 +178,13 @@ class Translator:
                 "Never translate. Don't change the language. Please respect the original language.\n"
                 "Please follow the information below for reference.\n"
             )
+        prompt = base_prompt + "\n".join(hints)
+        logger.debug(f"Model: {self.model_name}")
+        logger.debug(f"Prompt: {prompt}")
+        logger.debug(f"Text: {text}")
         response = self.llm.completion(
             [
-                {"role": "system", "content": base_prompt + "\n".join(hints)},
+                {"role": "system", "content": prompt},
                 {"role": "user", "content": text},
             ],
         )

@@ -1,3 +1,4 @@
+import logging
 from unittest.mock import MagicMock, call, patch
 
 from ailingo.cli import app
@@ -197,3 +198,17 @@ def test_translate_editor_no_changes(mock_run):
         result = runner.invoke(app, ["-e"])
     assert result.exit_code == 1
     assert "No changes made. Exiting..." in result.output
+
+
+@patch("ailingo.cli.Translator")
+def test_debug_mode(mock_translator, caplog):
+    mock_instance = MagicMock()
+    mock_translator.return_value = mock_instance
+
+    with caplog.at_level(logging.INFO):
+        runner.invoke(app, ["translate", "dummy.txt", "--target", "en"])
+    assert "DEBUG" not in caplog.text
+
+    with caplog.at_level(logging.DEBUG):
+        runner.invoke(app, ["--debug", "translate", "dummy.txt", "--target", "en"])
+    assert "DEBUG" in caplog.text
