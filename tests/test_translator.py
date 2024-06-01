@@ -58,7 +58,10 @@ def test_translate_new_file(translator: Translator, mock_file_manager, mock_llm)
                 "- Target language code: fr\n"
                 "- File extension: .txt",
             },
-            {"role": "user", "content": "Hello, world!"},
+            {
+                "role": "user",
+                "content": "User provided text:\n----------\nHello, world!",
+            },
         ],
     )
     mock_file_manager.save_text_file.assert_called_once_with(
@@ -92,7 +95,10 @@ def translate_with_source(translator: Translator, mock_file_manager, mock_llm):
                 "- Target language code: fr\n"
                 "- File extension: .txt\n",
             },
-            {"role": "user", "content": "Hello, world!"},
+            {
+                "role": "user",
+                "content": "User provided text:\n----------\nHello, world!",
+            },
         ],
     )
     mock_file_manager.save_text_file.assert_called_once_with(
@@ -151,7 +157,10 @@ def test_translate_overwrite(translator: Translator, mock_file_manager, mock_llm
                 "and only change and translate the parts that differ from the text provided by the user.\n"
                 "Bonjour, le monde(existing file)",
             },
-            {"role": "user", "content": "Hello, world!"},
+            {
+                "role": "user",
+                "content": "User provided text:\n----------\nHello, world!",
+            },
         ],
     )
     mock_file_manager.save_text_file.assert_called_once_with(
@@ -225,7 +234,10 @@ def test_translate_with_request(translator: Translator, mock_file_manager, mock_
                 "- File extension: .txt\n"
                 "- Additional request: Do not translate the word 'world'.",
             },
-            {"role": "user", "content": "Hello, world!"},
+            {
+                "role": "user",
+                "content": "User provided text:\n----------\nHello, world!",
+            },
         ],
     )
     mock_file_manager.save_text_file.assert_called_once_with(
@@ -256,7 +268,10 @@ def test_rewrite(translator: Translator, mock_file_manager, mock_llm):
                 "that differ from the text provided by the user.\n"
                 "Hello, world!",
             },
-            {"role": "user", "content": "Hello, world!"},
+            {
+                "role": "user",
+                "content": "User provided text:\n----------\nHello, world!",
+            },
         ],
     )
     mock_file_manager.save_text_file.assert_called_once_with(

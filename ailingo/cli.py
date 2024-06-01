@@ -9,6 +9,9 @@ from ailingo.translator import DEFAULT_OUTPUT_PATTERN, Translator
 from ailingo.utils import setup_logger
 from rich import print
 from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.markdown import Markdown
+from requests_html import HTMLSession
 
 app = typer.Typer()
 
@@ -21,6 +24,7 @@ def translate(
     file_paths: list[str] = typer.Argument(
         default=None, help="Input file(s) to translate."
     ),
+    url: str = typer.Option(None, "-u", "--url", help="URL to translate."),
     source_language: str = typer.Option(
         None, "-s", "--source", help="Source language(Optional)"
     ),
@@ -75,6 +79,9 @@ def translate(
         target_languages = target_languages_str.split(",")
     else:
         target_languages = []
+    if not file_paths:
+        file_paths = []
+    no_temp_file = bool(dryrun or output_pattern)
 
     translator = Translator(model_name=model_name)
 
@@ -87,11 +94,18 @@ def translate(
         raise typer.BadParameter(
             "Multiple target languages cannot be specified in edit mode."
         )
+    if edit and url:
+        raise typer.BadParameter("Cannot specify both url and edit.")
+    if url and len(target_languages) > 1:
+        raise typer.BadParameter(
+            "Multiple target languages cannot be specified with url."
+        )
+    if file_paths and url:
+        raise typer.BadParameter("Cannot specify both file_paths and url.")
 
     # edit mode
     if edit:
         logger.debug("Edit mode enabled.")
-        no_temp_file = bool(dryrun or output_pattern)
         with (
             tempfile.NamedTemporaryFile(mode="w+", suffix=".txt") as input,
             tempfile.NamedTemporaryFile(
@@ -105,13 +119,57 @@ def translate(
                 source_language=source_language,
                 target_language=target_languages[0] if target_languages else None,
                 output_pattern=output_pattern if output_pattern else output.name,
-                overwrite=True,
+                overwrite=overwrite if output_pattern else True,
                 dryrun=dryrun,
                 request=request,
                 quiet=quiet,
             )
             output.seek(0)
             print(output.read())
+        return
+
+    if url:
+        logger.debug("URL mode enabled.")
+        with (
+            tempfile.NamedTemporaryFile(mode="w+", suffix=".html") as input,
+            tempfile.NamedTemporaryFile(
+                mode="w+", suffix=".md", delete=no_temp_file
+            ) as output,
+        ):
+            if dryrun:
+                text = ""
+            else:
+                with Progress(
+                    SpinnerColumn(),
+                    TextColumn("[progress.description]{task.description}"),
+                    transient=True,
+                ) as progress:
+                    if not quiet:
+                        progress.add_task(
+                            description=(
+                                f":writing_hand: [bold blue]Downloading...[/bold blue] "
+                                f"[bright_black]{url}[/bright_black]"
+                            ),
+                            total=None,
+                        )
+                    session = HTMLSession()
+                    response = session.get(url)
+                response.raise_for_status()
+                text = response.html.text  # type: ignore
+            input.write(text)
+            translator.translate(
+                file_path=input.name,
+                source_language=source_language,
+                target_language=target_languages[0] if target_languages else None,
+                output_pattern=output_pattern if output_pattern else output.name,
+                overwrite=overwrite if output_pattern else True,
+                dryrun=dryrun,
+                request=request
+                or "Original text is extracted from a website. Convert it to markdown.",
+                quiet=quiet,
+            )
+            output.seek(0)
+            print(Markdown(output.read()))
         return
 
     # rewrite mode

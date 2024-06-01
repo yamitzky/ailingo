@@ -19,12 +19,6 @@
   <a href="./README.es.md">Español</a>
 </p>
 
-<p align="center">
-    <img alt="example" src="https://github.com/yamitzky/ailingo/assets/623449/faae1265-9ab6-4df5-a787-23e73fff9778">
-</p>
-
-NOTICE: This document was automatically generated using ailingo.
-
 ## Overview
 
 It is designed to enable developers, translators, and content creators to efficiently localize their files.
@@ -38,6 +32,7 @@ It is designed to enable developers, translators, and content creators to effici
 - **Adding translation requests**: Add requests for nuances in translation, such as casual tone.
 - **Rewrite mode**: Rewrite text in the same language with spelling/grammar correction or adjust the writing style as requested.
 - **Editor mode**: Translate text directly in an editor.
+- **URL mode**: Download and translate a web page. 
 
 ## Installation
 
@@ -154,6 +149,16 @@ Other options can be used in combination:
 - The target language can be specified with `--target`.
 - Style modification requests can be added with `--request`.
 - The translation result is displayed on standard output by default, but an output file can be specified with `--output`.
+
+### URL mode: Translating web pages
+
+```bash
+ailingo -u <URL> --target <target language>
+```
+
+In URL mode, ailingo extracts the text content of the web page at the specified URL, translates it, and outputs it in Markdown format. 
+
+Other options can be used in combination:
 
 ### Specifying the Generative AI Model:
 

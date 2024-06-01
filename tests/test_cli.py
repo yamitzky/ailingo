@@ -1,5 +1,5 @@
 import logging
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, call, patch, ANY
 
 from ailingo.cli import app
 from ailingo.translator import Translator
@@ -212,3 +212,41 @@ def test_debug_mode(mock_translator, caplog):
     with caplog.at_level(logging.DEBUG):
         runner.invoke(app, ["--debug", "translate", "dummy.txt", "--target", "en"])
     assert "DEBUG" in caplog.text
+
+
+@patch("ailingo.cli.Translator")
+@patch("ailingo.cli.HTMLSession")
+def test_translate_url(mock_session, mock_translator, tmp_path):
+    mock_response = MagicMock()
+    mock_response.html.text = "This is a test website."
+    mock_session.return_value.get.return_value = mock_response
+    mock_instance = MagicMock()
+    mock_translator.return_value = mock_instance
+
+    result = runner.invoke(
+        app,
+        [
+            "-u",
+            "https://example.com",
+            "-t",
+            "fr",
+            "-m",
+            "gpt-4o",
+            "-o",
+            str(tmp_path / "{stem}.fr.{ext}"),
+        ],
+    )
+
+    assert result.exit_code == 0
+    mock_instance.translate.assert_called_once_with(
+        file_path=ANY,
+        source_language=None,
+        target_language="fr",
+        output_pattern=str(tmp_path / "{stem}.fr.{ext}"),
+        overwrite=False,
+        dryrun=False,
+        request="Original text is extracted from a website. Convert it to markdown.",
+        quiet=False,
+    )
+    assert mock_instance.translate.call_count == 1
+    mock_translator.assert_called_once_with(model_name="gpt-4o")
