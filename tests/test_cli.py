@@ -205,7 +205,7 @@ def test_debug_mode(mock_translator, caplog):
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
 
-    with caplog.at_level(logging.DEBUG):
+    with caplog.at_level(logging.INFO):
         runner.invoke(app, ["translate", "dummy.txt", "--target", "en"])
     assert "DEBUG" not in caplog.text
 

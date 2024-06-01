@@ -22,6 +22,7 @@ class Translator:
     ) -> None:
         self.file_manager = file_manager or FileManager()
         self.llm = llm or LLM(model_name)
+        self.model_name = model_name
 
     def translate(
         self,
@@ -178,7 +179,7 @@ class Translator:
                 "Please follow the information below for reference.\n"
             )
         prompt = base_prompt + "\n".join(hints)
-        logger.debug(f"Model: {self.llm.model_name}")
+        logger.debug(f"Model: {self.model_name}")
         logger.debug(f"Prompt: {prompt}")
         logger.debug(f"Text: {text}")
         response = self.llm.completion(
