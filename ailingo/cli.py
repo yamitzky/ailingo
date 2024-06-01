@@ -1,15 +1,19 @@
+import logging
+from logging import getLogger
 import os
 import subprocess
 import tempfile
 
 import typer
 from ailingo.translator import DEFAULT_OUTPUT_PATTERN, Translator
+from ailingo.utils import setup_logger
 from rich import print
 from rich.console import Console
 
 app = typer.Typer()
 
 err_console = Console(stderr=True)
+logger = getLogger(__name__)
 
 
 @app.command()
@@ -56,10 +60,17 @@ def translate(
     quiet: bool = typer.Option(
         False, "-q", "--quiet", help="Suppress all output messages."
     ),
+    debug: bool = typer.Option(False, "--debug", help="Enable debug mode."),
 ) -> None:
     """
     Translates the specified files.
     """
+    setup_logger(logging.DEBUG if debug else None)
+    if debug:
+        logger.debug("Debug mode enabled.")
+    if dryrun:
+        logger.debug("Dry run enabled.")
+
     if target_languages_str:
         target_languages = target_languages_str.split(",")
     else:
@@ -79,6 +90,7 @@ def translate(
 
     # edit mode
     if edit:
+        logger.debug("Edit mode enabled.")
         no_temp_file = bool(dryrun or output_pattern)
         with (
             tempfile.NamedTemporaryFile(mode="w+", suffix=".txt") as input,
@@ -104,6 +116,7 @@ def translate(
 
     # rewrite mode
     if not target_languages:
+        logger.debug("Rewrite mode enabled.")
         for file_path in file_paths:
             translator.translate(
                 file_path=file_path,
@@ -118,6 +131,7 @@ def translate(
         return
 
     # normal mode
+    logger.debug("Normal mode enabled.")
     for file_path in file_paths:
         for target_language in target_languages:
             translator.translate(
