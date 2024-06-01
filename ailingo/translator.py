@@ -182,6 +182,7 @@ class Translator:
         logger.debug(f"Model: {self.model_name}")
         logger.debug(f"Prompt: {prompt}")
         logger.debug(f"Text: {text}")
+        text = f"User provided text:\n----------\n{text}"
         response = self.llm.completion(
             [
                 {"role": "system", "content": prompt},

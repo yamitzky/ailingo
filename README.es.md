@@ -1,4 +1,4 @@
-# ailingo: Una herramienta CLI para traducir archivos locales usando AI generativa (LLM)
+# ailingo: Una herramienta CLI para traducir archivos locales usando IA generativa (LLM)
 
 **ailingo** es una herramienta de línea de comandos (CLI) que utiliza inteligencia artificial generativa para traducir archivos locales a varios idiomas.
 
@@ -34,6 +34,7 @@ Está diseñada para que desarrolladores, traductores y creadores de contenido p
 - **Añadir solicitudes de traducción:** Añade solicitudes para matices en la traducción, como un tono casual.
 - **Modo de reescritura:** Reescribe el texto en el mismo idioma con corrección ortográfica/gramatical o ajusta el estilo de escritura según lo solicitado.
 - **Modo Editor:** Traduce texto directamente en un editor.
+- **Modo URL:** Descarga y traduce páginas web.
 
 ## Instalación
 
@@ -53,7 +54,7 @@ ailingo my_document.txt --target ja
 
 #### 1. Configuración de litellm:
 
-Este programa utiliza LiteLLM para acceder a AI generativa. LiteLLM está diseñado para funcionar con una variedad de proveedores. Por favor, crea una cuenta con el proveedor del modelo de AI generativa que deseas usar y obtén una clave API.
+Este programa utiliza LiteLLM para acceder a IA generativa. LiteLLM está diseñado para funcionar con una variedad de proveedores. Por favor, crea una cuenta con el proveedor del modelo de IA generativa que deseas usar y obtén una clave API.
 
 Por favor, consulta la [documentación de LiteLLM](https://docs.litellm.ai/docs/providers) para instrucciones detalladas de configuración. Aquí hay algunos ejemplos de cómo configurar claves API típicas:
 
@@ -104,7 +105,7 @@ Esto traducirá `my_document.txt` al japonés y lo guardará como `my_document.j
 ailingo /path/to/en/my_document.txt --source en --target ja
 ```
 
-Esto traducirá `my_document.txt` al japonés y lo guardará como `/path/to/ja/my_document.txt`. Esta característica reemplaza el código del idioma fuente con el código del idioma objetivo si el nombre del archivo o el nombre del directorio contiene el código del idioma fuente.
+Esto traducirá `my_document.txt` al japonés y lo guardará como `/path/to/ja/my_document.txt`. Esta característica reemplaza el código del idioma fuente por el código del idioma objetivo si el nombre del archivo o el nombre del directorio contiene el código del idioma fuente.
 
 - Ejemplo: `document.en.txt` → `document.ja.txt`
 - Ejemplo: `locales/en/LC_MESSAGES/message.po` → `locales/ja/LC_MESSAGES/message.po`
@@ -151,7 +152,17 @@ Otras opciones pueden usarse en combinación:
 - Solicitudes de modificación de estilo pueden añadirse con `--request`.
 - El resultado de la traducción se muestra en la salida estándar por defecto, pero puede especificarse un archivo de salida con `--output`.
 
-### Especificar el Modelo de AI Generativa:
+### Modo URL: Traduce páginas web
+
+```bash
+ailingo -u <URL> --target <idioma objetivo>
+```
+
+En el modo URL, se extrae, traduce el contenido textual de la página web especificada y se guarda en formato Markdown.
+
+Otras opciones pueden usarse en combinación.
+
+### Especificar el Modelo de IA Generativa:
 
 ```bash
 ailingo my_document.txt --target de --model gemini-1.5-pro
@@ -184,7 +195,7 @@ La cadena especificada para `--output` es interpretada por la [función format](
 | `{parent}` | Directorio principal del archivo de entrada | `str` | `/path/to/en` |
 | `{parents}` | Lista de directorios principales del archivo de entrada | `list[str]` | `['/path/to', '/path']` |
 | `{target}` | Idioma objetivo | `str` | `ja` |
-| `{source}` | Idioma fuente (solo si se especifica) | `Optional[str]` | `en` |
+| `{source}` | Idioma fuente (sólo si se especifica) | `Optional[str]` | `en` |
 
 Para otras variables, por favor consulta la [documentación de Pathlib](https://docs.python.org/3/library/pathlib.html#methods-and-properties).
 
@@ -202,4 +213,4 @@ Este proyecto se distribuye bajo la Licencia MIT.
 
 ## Descargo de responsabilidad
 
-Esta herramienta utiliza AI generativa, pero la calidad de la traducción depende del modelo de AI seleccionado y del texto de entrada. Se recomienda revisar los resultados de la traducción y hacer las correcciones necesarias.
+Esta herramienta utiliza IA generativa, pero la calidad de la traducción depende del modelo de IA seleccionado y del texto de entrada. Se recomienda revisar los resultados de la traducción y hacer las correcciones necesarias.
