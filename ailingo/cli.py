@@ -1,8 +1,10 @@
 import logging
 from logging import getLogger
 import os
+from pathlib import Path
 import subprocess
 import tempfile
+from typing import Annotated, Optional
 
 import typer
 from ailingo.translator import DEFAULT_OUTPUT_PATTERN, Translator
@@ -19,73 +21,18 @@ err_console = Console(stderr=True)
 logger = getLogger(__name__)
 
 
-@app.command()
-def translate(
-    file_paths: list[str] = typer.Argument(
-        default=None, help="Input file(s) to translate."
-    ),
-    url: str = typer.Option(None, "-u", "--url", help="URL to translate."),
-    source_language: str = typer.Option(
-        None, "-s", "--source", help="Source language(Optional)"
-    ),
-    target_languages_str: str = typer.Option(
-        None,
-        "-t",
-        "--target",
-        help="Comma-separated list of target languages. If omitted, original file will be rewritten.",
-    ),
-    model_name: str = typer.Option(
-        "gpt-4o",
-        "-m",
-        "--model",
-        envvar="MODEL_NAME",
-        help="Generative AI model to use for translation(e.g. gpt-4o, gemini-1.5-pro).",
-    ),
-    output_pattern: str = typer.Option(
-        None,
-        "-o",
-        "--output",
-        help="Output file name pattern.",
-        show_default=DEFAULT_OUTPUT_PATTERN,
-    ),
-    overwrite: bool = typer.Option(
-        False, "-y", "--yes", help="Skip confirmation before overwriting."
-    ),
-    request: str = typer.Option(
-        None,
-        "-r",
-        "--request",
-        help="Add a translation request",
-    ),
-    edit: bool = typer.Option(False, "-e", "--edit", help="Edit mode."),
-    dryrun: bool = typer.Option(
-        False, "--dry-run", help="Perform a trial run with no changes made."
-    ),
-    quiet: bool = typer.Option(
-        False, "-q", "--quiet", help="Suppress all output messages."
-    ),
-    debug: bool = typer.Option(False, "--debug", help="Enable debug mode."),
-) -> None:
-    """
-    Translates the specified files.
-    """
-    setup_logger(logging.DEBUG if debug else None)
-    if debug:
-        logger.debug("Debug mode enabled.")
-    if dryrun:
-        logger.debug("Dry run enabled.")
+def _comma_separated_list_callback(value: str) -> list[str]:
+    if value:
+        return value.split(",")
+    return []
 
-    if target_languages_str:
-        target_languages = target_languages_str.split(",")
-    else:
-        target_languages = []
-    if not file_paths:
-        file_paths = []
-    no_temp_file = bool(dryrun or output_pattern)
 
-    translator = Translator(model_name=model_name)
-
-    # validate arguments
+def _validate(
+    edit: bool,
+    file_paths: list[Path],
+    target_languages: list[str],
+    url: str | None,
+):
     if edit and file_paths:
         raise typer.BadParameter(
             "File paths cannot be specified in edit mode. Please remove the argument."
@@ -102,6 +49,96 @@ def translate(
         )
     if file_paths and url:
         raise typer.BadParameter("Cannot specify both file_paths and url.")
+
+
+@app.command()
+def translate(
+    file_paths: Annotated[
+        Optional[list[Path]],
+        typer.Argument(
+            help="Input file(s) to translate.",
+            dir_okay=False,
+            exists=True,
+        ),
+    ] = None,
+    url: Annotated[
+        Optional[str], typer.Option("-u", "--url", help="URL to translate.")
+    ] = None,
+    source_language: Annotated[
+        Optional[str],
+        typer.Option("-s", "--source", help="Source language(Optional)"),
+    ] = None,
+    target_languages: Annotated[
+        list,  # list[str] not work
+        typer.Option(
+            "-t",
+            "--target",
+            help="Comma-separated list of target languages. If omitted, original file will be rewritten.",
+            parser=_comma_separated_list_callback,
+        ),
+    ] = [],
+    model_name: Annotated[
+        str,
+        typer.Option(
+            "-m",
+            "--model",
+            envvar="MODEL_NAME",
+            help="Generative AI model to use for translation(e.g. gpt-4o, gemini-1.5-pro).",
+        ),
+    ] = "gpt-4o",
+    output_pattern: Annotated[
+        Optional[str],
+        typer.Option(
+            "-o",
+            "--output",
+            help="Output file name pattern.",
+            show_default=DEFAULT_OUTPUT_PATTERN,
+        ),
+    ] = None,
+    overwrite: Annotated[
+        bool,
+        typer.Option("-y", "--yes", help="Skip confirmation before overwriting."),
+    ] = False,
+    request: Annotated[
+        Optional[str],
+        typer.Option(
+            "-r",
+            "--request",
+            help="Add a translation request",
+        ),
+    ] = None,
+    edit: Annotated[bool, typer.Option("-e", "--edit", help="Edit mode.")] = False,
+    dryrun: Annotated[
+        bool,
+        typer.Option("--dry-run", help="Perform a trial run with no changes made."),
+    ] = False,
+    quiet: Annotated[
+        bool, typer.Option("-q", "--quiet", help="Suppress all output messages.")
+    ] = False,
+    debug: Annotated[bool, typer.Option("--debug", help="Enable debug mode.")] = False,
+) -> None:
+    """
+    Translates the specified files.
+    """
+    setup_logger(logging.DEBUG if debug else None)
+    if debug:
+        logger.debug("Debug mode enabled.")
+    if dryrun:
+        logger.debug("Dry run enabled.")
+
+    if not file_paths:
+        file_paths = []
+    no_temp_file = bool(dryrun or output_pattern)
+
+    translator = Translator(model_name=model_name)
+
+    # validate arguments
+    _validate(
+        edit=edit,
+        file_paths=file_paths,
+        target_languages=target_languages,
+        url=url,
+    )
 
     # edit mode
     if edit:
@@ -177,7 +214,7 @@ def translate(
         logger.debug("Rewrite mode enabled.")
         for file_path in file_paths:
             translator.translate(
-                file_path=file_path,
+                file_path=str(file_path),
                 source_language=source_language,
                 target_language=None,
                 output_pattern=output_pattern,
@@ -193,7 +230,7 @@ def translate(
     for file_path in file_paths:
         for target_language in target_languages:
             translator.translate(
-                file_path=file_path,
+                file_path=str(file_path),
                 source_language=source_language,
                 target_language=target_language,
                 output_pattern=output_pattern,
