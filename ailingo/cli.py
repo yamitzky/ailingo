@@ -1,19 +1,19 @@
 import logging
 from logging import getLogger
-import os
 from pathlib import Path
-import subprocess
-import tempfile
-from typing import Annotated, Optional
+from typing import Annotated, Optional, cast
 
 import typer
+from rich.console import Console
+
+from ailingo.input_source import InputSource
+from ailingo.input_source.editor_source import EditorInputSource
+from ailingo.input_source.file_source import FileInputSource
+from ailingo.input_source.url_source import UrlInputSource
+from ailingo.output_source.console_source import ConsoleOutputSource
+from ailingo.output_source.file_source import FileOutputSource
 from ailingo.translator import DEFAULT_OUTPUT_PATTERN, Translator
 from ailingo.utils import setup_logger
-from rich import print
-from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn
-from rich.markdown import Markdown
-from requests_html import HTMLSession
 
 app = typer.Typer()
 
@@ -68,7 +68,7 @@ def translate(
         Optional[str],
         typer.Option("-s", "--source", help="Source language(Optional)"),
     ] = None,
-    target_languages: Annotated[
+    _target_languages: Annotated[
         list,  # list[str] not work
         typer.Option(
             "-t",
@@ -128,7 +128,7 @@ def translate(
 
     if not file_paths:
         file_paths = []
-    no_temp_file = bool(dryrun or output_pattern)
+    target_languages = cast(list[str], _target_languages)
 
     translator = Translator(model_name=model_name)
 
@@ -140,118 +140,59 @@ def translate(
         url=url,
     )
 
-    # edit mode
+    console_output: ConsoleOutputSource | None = None
     if edit:
         logger.debug("Edit mode enabled.")
-        with (
-            tempfile.NamedTemporaryFile(mode="w+", suffix=".txt") as input,
-            tempfile.NamedTemporaryFile(
-                mode="w+", suffix=".txt", delete=no_temp_file
-            ) as output,
-        ):
-            if not dryrun:
-                _run_editor(input.name)
-            translator.translate(
-                file_path=input.name,
-                source_language=source_language,
-                target_language=target_languages[0] if target_languages else None,
-                output_pattern=output_pattern if output_pattern else output.name,
-                overwrite=overwrite if output_pattern else True,
-                dryrun=dryrun,
-                request=request,
-                quiet=quiet,
-            )
-            output.seek(0)
-            print(output.read())
-        return
-
-    if url:
+        input_sources: list[InputSource] = [EditorInputSource(dryrun=dryrun)]
+        if not output_pattern:
+            console_output = ConsoleOutputSource()
+    elif url:
         logger.debug("URL mode enabled.")
-        with (
-            tempfile.NamedTemporaryFile(mode="w+", suffix=".html") as input,
-            tempfile.NamedTemporaryFile(
-                mode="w+", suffix=".md", delete=no_temp_file
-            ) as output,
-        ):
-            if dryrun:
-                text = ""
+        input_sources = [UrlInputSource(url, quiet=quiet, dryrun=dryrun)]
+        if not output_pattern:
+            console_output = ConsoleOutputSource(markdown=True)
+        if not request:
+            request = (
+                "Original text is extracted from a website. Convert it to markdown."
+            )
+    else:
+        input_sources = [FileInputSource(path) for path in file_paths]
+        if target_languages:
+            logger.debug("Normal mode enabled.")
+        else:
+            logger.debug("Rewrite mode enabled.")
+
+    for input_source in input_sources:
+        for target_language in target_languages or [None]:
+            if console_output:
+                # edit mode or url mode, without output pattern
+                output_source = console_output
+            elif output_pattern:
+                # with output pattern
+                output_source = FileOutputSource.from_pattern(
+                    input_source.path,
+                    output_pattern or DEFAULT_OUTPUT_PATTERN,
+                    source=source_language,
+                    target=target_language,
+                )
+            elif source_language and target_language:
+                # output pattern not specified, but normal mode
+                output_source = FileOutputSource.from_replacement(
+                    input_source.path, source_language, target_language
+                )
             else:
-                with Progress(
-                    SpinnerColumn(),
-                    TextColumn("[progress.description]{task.description}"),
-                    transient=True,
-                ) as progress:
-                    if not quiet:
-                        progress.add_task(
-                            description=(
-                                f":writing_hand: [bold blue]Downloading...[/bold blue] "
-                                f"[bright_black]{url}[/bright_black]"
-                            ),
-                            total=None,
-                        )
-                    session = HTMLSession()
-                    response = session.get(url)
-                response.raise_for_status()
-                text = response.html.text  # type: ignore
-            input.write(text)
+                # otherwise, rewrite original file
+                output_source = FileOutputSource(input_source.path)
             translator.translate(
-                file_path=input.name,
-                source_language=source_language,
-                target_language=target_languages[0] if target_languages else None,
-                output_pattern=output_pattern if output_pattern else output.name,
-                overwrite=overwrite if output_pattern else True,
-                dryrun=dryrun,
-                request=request
-                or "Original text is extracted from a website. Convert it to markdown.",
-                quiet=quiet,
-            )
-            output.seek(0)
-            print(Markdown(output.read()))
-        return
-
-    # rewrite mode
-    if not target_languages:
-        logger.debug("Rewrite mode enabled.")
-        for file_path in file_paths:
-            translator.translate(
-                file_path=str(file_path),
-                source_language=source_language,
-                target_language=None,
-                output_pattern=output_pattern,
-                overwrite=overwrite,
-                dryrun=dryrun,
-                request=request,
-                quiet=quiet,
-            )
-        return
-
-    # normal mode
-    logger.debug("Normal mode enabled.")
-    for file_path in file_paths:
-        for target_language in target_languages:
-            translator.translate(
-                file_path=str(file_path),
+                input_source=input_source,
+                output_source=output_source,
                 source_language=source_language,
                 target_language=target_language,
-                output_pattern=output_pattern,
                 overwrite=overwrite,
                 dryrun=dryrun,
                 request=request,
                 quiet=quiet,
             )
-
-
-def _run_editor(file_path: str):
-    editor = os.getenv("EDITOR", "vi")
-    try:
-        subprocess.run([editor, file_path], check=True)
-    except FileNotFoundError:
-        err_console.print(f"Editor '{editor}' not found. Please set a default editor.")
-        raise typer.Exit(code=1)
-
-    if os.path.getsize(file_path) == 0:
-        err_console.print("No changes made. Exiting...")
-        raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":

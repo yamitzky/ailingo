@@ -37,3 +37,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 ailingo = "ailingo.cli:app"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

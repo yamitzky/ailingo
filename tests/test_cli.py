@@ -1,9 +1,14 @@
 import logging
-from unittest.mock import MagicMock, call, patch, ANY
+from unittest.mock import MagicMock, call, patch
+
+from typer.testing import CliRunner
 
 from ailingo.cli import app
-from ailingo.translator import Translator
-from typer.testing import CliRunner
+from ailingo.input_source.editor_source import EditorInputSource
+from ailingo.input_source.file_source import FileInputSource
+from ailingo.input_source.url_source import UrlInputSource
+from ailingo.output_source.console_source import ConsoleOutputSource
+from ailingo.output_source.file_source import FileOutputSource
 
 runner = CliRunner()
 
@@ -40,10 +45,10 @@ def test_translate_command(mock_translator, tmp_path):
 
     assert result.exit_code == 0
     mock_instance.translate.assert_called_once_with(
-        file_path=str(tmp_path / "test.txt"),
+        input_source=FileInputSource(str(tmp_path / "test.txt")),
+        output_source=FileOutputSource(str(tmp_path / "test.fr.txt")),
         source_language=None,
         target_language="fr",
-        output_pattern="{parent}/{stem}.fr{suffix}",
         overwrite=False,
         dryrun=False,
         request=None,
@@ -72,7 +77,7 @@ def test_translate_multiple_files(mock_translator, tmp_path):
             "-m",
             "gemini-1.5-pro",
             "-o",
-            "{parent}/{stem}{target}{suffix}",
+            "{parent}/{stem}.{target}{suffix}",
         ],
     )
 
@@ -81,40 +86,40 @@ def test_translate_multiple_files(mock_translator, tmp_path):
     mock_instance.translate.assert_has_calls(
         [
             call(
-                file_path=str(tmp_path / "test.txt"),
+                input_source=FileInputSource(str(tmp_path / "test.txt")),
+                output_source=FileOutputSource(str(tmp_path / "test.fr.txt")),
                 source_language=None,
                 target_language="fr",
-                output_pattern="{parent}/{stem}{target}{suffix}",
                 overwrite=False,
                 dryrun=False,
                 request=None,
                 quiet=False,
             ),
             call(
-                file_path=str(tmp_path / "test2.txt"),
+                input_source=FileInputSource(str(tmp_path / "test2.txt")),
+                output_source=FileOutputSource(str(tmp_path / "test2.fr.txt")),
                 source_language=None,
                 target_language="fr",
-                output_pattern="{parent}/{stem}{target}{suffix}",
                 overwrite=False,
                 dryrun=False,
                 request=None,
                 quiet=False,
             ),
             call(
-                file_path=str(tmp_path / "test.txt"),
+                input_source=FileInputSource(str(tmp_path / "test.txt")),
+                output_source=FileOutputSource(str(tmp_path / "test.ja.txt")),
                 source_language=None,
                 target_language="ja",
-                output_pattern="{parent}/{stem}{target}{suffix}",
                 overwrite=False,
                 dryrun=False,
                 request=None,
                 quiet=False,
             ),
             call(
-                file_path=str(tmp_path / "test2.txt"),
+                input_source=FileInputSource(str(tmp_path / "test2.txt")),
+                output_source=FileOutputSource(str(tmp_path / "test2.ja.txt")),
                 source_language=None,
                 target_language="ja",
-                output_pattern="{parent}/{stem}{target}{suffix}",
                 overwrite=False,
                 dryrun=False,
                 request=None,
@@ -149,20 +154,20 @@ def test_rewrite_mode(mock_translator, tmp_path):
     mock_instance.translate.assert_has_calls(
         [
             call(
-                file_path=str(tmp_path / "test.txt"),
+                input_source=FileInputSource(str(tmp_path / "test.txt")),
+                output_source=FileOutputSource(str(tmp_path / "test.txt")),
                 source_language="en",
                 target_language=None,
-                output_pattern=None,
                 overwrite=False,
                 dryrun=False,
                 request=None,
                 quiet=False,
             ),
             call(
-                file_path=str(tmp_path / "test2.txt"),
+                input_source=FileInputSource(str(tmp_path / "test2.txt")),
+                output_source=FileOutputSource(str(tmp_path / "test2.txt")),
                 source_language="en",
                 target_language=None,
-                output_pattern=None,
                 overwrite=False,
                 dryrun=False,
                 request=None,
@@ -174,18 +179,42 @@ def test_rewrite_mode(mock_translator, tmp_path):
     assert mock_instance.translate.call_count == 2
 
 
-@patch.object(Translator, "translate", side_effect=mock_translate)
-@patch("ailingo.cli.subprocess.run", side_effect=mock_subprocess_run)
-def test_translate_edit_mode(mock_translator, mock_run_editor, tmp_path):
+@patch("ailingo.cli.Translator")
+def test_edit_mode(mock_translator, tmp_path):
+    mock_instance = MagicMock()
+    mock_translator.return_value = mock_instance
+
     result = runner.invoke(app, ["-e"])
     assert result.exit_code == 0
-    assert "Translated content." in result.output
+    mock_instance.translate.assert_called_once_with(
+        input_source=EditorInputSource(),
+        output_source=ConsoleOutputSource(),
+        source_language=None,
+        target_language=None,
+        overwrite=False,
+        dryrun=False,
+        request=None,
+        quiet=False,
+    )
+
+
+@patch("ailingo.cli.Translator")
+def test_edit_mode_with_output_file(mock_translator, tmp_path):
+    mock_instance = MagicMock()
+    mock_translator.return_value = mock_instance
 
     result = runner.invoke(app, ["-e", "-o", str(tmp_path / "output.txt")])
     assert result.exit_code == 0
-    assert "Translated content." not in result.output
-    with open(tmp_path / "output.txt") as f:
-        assert f.read() == "Translated content."
+    mock_instance.translate.assert_called_once_with(
+        input_source=EditorInputSource(),
+        output_source=FileOutputSource(str(tmp_path / "output.txt")),
+        source_language=None,
+        target_language=None,
+        overwrite=False,
+        dryrun=False,
+        request=None,
+        quiet=False,
+    )
 
 
 def test_translate_invalid_language_option():
@@ -202,14 +231,6 @@ def test_translate_edit_mode_with_file_argument(tmp_path):
     result = runner.invoke(app, [str(tmp_path / "test.txt"), "-e"])
     assert result.exit_code == 2
     assert "File paths cannot be specified in edit mode." in result.output
-
-
-@patch("ailingo.cli.subprocess.run", side_effect=mock_subprocess_run)
-def test_translate_editor_no_changes(mock_run):
-    with patch("os.path.getsize", return_value=0):
-        result = runner.invoke(app, ["-e"])
-    assert result.exit_code == 1
-    assert "No changes made. Exiting..." in result.output
 
 
 @patch("ailingo.cli.Translator")
@@ -229,11 +250,7 @@ def test_debug_mode(mock_translator, caplog, tmp_path):
 
 
 @patch("ailingo.cli.Translator")
-@patch("ailingo.cli.HTMLSession")
-def test_translate_url(mock_session, mock_translator, tmp_path):
-    mock_response = MagicMock()
-    mock_response.html.text = "This is a test website."
-    mock_session.return_value.get.return_value = mock_response
+def test_translate_url(mock_translator, tmp_path):
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
 
@@ -247,16 +264,16 @@ def test_translate_url(mock_session, mock_translator, tmp_path):
             "-m",
             "gpt-4o",
             "-o",
-            str(tmp_path / "{stem}.fr.{ext}"),
+            str(tmp_path / "output.fr.txt"),
         ],
     )
 
     assert result.exit_code == 0
     mock_instance.translate.assert_called_once_with(
-        file_path=ANY,
+        input_source=UrlInputSource("https://example.com"),
+        output_source=FileOutputSource(str(tmp_path / "output.fr.txt")),
         source_language=None,
         target_language="fr",
-        output_pattern=str(tmp_path / "{stem}.fr.{ext}"),
         overwrite=False,
         dryrun=False,
         request="Original text is extracted from a website. Convert it to markdown.",
