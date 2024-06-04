@@ -1,4 +1,3 @@
-
 from ailingo.input_source import InputSource
 from ailingo.prompt import PromptBuilder
 
