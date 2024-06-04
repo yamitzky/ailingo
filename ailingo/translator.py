@@ -1,5 +1,4 @@
 from logging import getLogger
-from pathlib import Path
 
 from rich import print
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -8,11 +7,9 @@ from rich.prompt import Confirm
 from ailingo.input_source import InputSource
 from ailingo.llm import LLM
 from ailingo.output_source import OutputSource
+from ailingo.prompt import PromptBuilder
 
 logger = getLogger(__name__)
-
-
-DEFAULT_OUTPUT_PATTERN = "{parent}/{stem}.{target}{suffix}"
 
 
 class Translator:
@@ -20,9 +17,11 @@ class Translator:
         self,
         model_name: str,
         llm: LLM | None = None,
+        prompt_builder: PromptBuilder | None = None,
     ) -> None:
         self.llm = llm or LLM(model_name)
         self.model_name = model_name
+        self.prompt_builder = prompt_builder or PromptBuilder()
 
     def translate(
         self,
@@ -107,53 +106,15 @@ class Translator:
         """
         Translates the specified text into the specified language using LLM.
         """
-        suffixes = ".".join(Path(input_source.path).suffixes)
-        file_name = Path(input_source.path).name
-        hints: list[str] = []
-        if source_language:
-            hints.append(f"- Source language code: {source_language}")
-        if target_language:
-            hints.append(
-                f"- Target language code: {target_language}",
-            )
-        if suffixes:
-            hints.append(f"- File extension: {suffixes}")
-        else:
-            hints.append(f"- File name: {file_name}")
-        if request:
-            hints.append(f"- Additional request: {request}")
-        if current_text:
-            hints.append(
-                "Also, some content has been previously translated. "
-                "Please use the original content as much as possible, and only change and translate the parts "
-                f"that differ from the text provided by the user.\n{current_text}"
-            )
-
-        if target_language:
-            base_prompt = (
-                "You are a translator that translates files. "
-                "Please translate the content of the file provided by the user.\n"
-                "Only output the translation result. Do not output any related comments and code blocks.\n"
-                "Please follow the information below for reference.\n"
-            )
-        else:
-            base_prompt = (
-                "You are a writer who rewrites text.\n"
-                "Please rewrite the provided text to make it more natural without changing the original meaning.\n"
-                "As a native speaker, correct any spelling, grammar, or terminology errors.\n"
-                "Only output the result. Do not output any related comments and code blocks.\n"
-                "Never translate. Don't change the language. Please respect the original language.\n"
-                "Please follow the information below for reference.\n"
-            )
-        prompt = base_prompt + "\n".join(hints)
+        prompt = self.prompt_builder.build(
+            input_path=input_source.path,
+            input_text=text,
+            source_language=source_language,
+            target_language=target_language,
+            request=request,
+            current_text=current_text,
+        )
         logger.debug(f"Model: {self.model_name}")
         logger.debug(f"Prompt: {prompt}")
-        logger.debug(f"Text: {text}")
-        text = f"User provided text:\n----------\n{text}"
-        response = self.llm.completion(
-            [
-                {"role": "system", "content": prompt},
-                {"role": "user", "content": text},
-            ],
-        )
+        response = self.llm.completion(prompt)
         return response

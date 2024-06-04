@@ -19,15 +19,9 @@ def test_url_input_source_path(url: str, expected_path: str):
     assert url_input_source.path == expected_path
 
 
-@pytest.mark.parametrize(
-    "dryrun, expected_text",
-    [
-        (True, ""),
-        (False, "test"),
-    ],
-)
-def test_url_input_source_read(dryrun: bool, expected_text: str):
-    url_input_source = UrlInputSource(url="https://www.example.com", dryrun=dryrun)
+def test_url_input_source_read():
+    expected_text = "test"
+    url_input_source = UrlInputSource(url="https://www.example.com")
     with mock.patch("requests_html.HTMLSession.get") as mock_get:
         mock_response = MagicMock()
         mock_response.html.text = expected_text

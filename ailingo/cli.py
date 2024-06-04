@@ -1,7 +1,7 @@
 import logging
 from logging import getLogger
 from pathlib import Path
-from typing import Annotated, Optional, cast
+from typing import Annotated, Literal, Optional, cast
 
 import typer
 from rich.console import Console
@@ -10,15 +10,20 @@ from ailingo.input_source import InputSource
 from ailingo.input_source.editor_source import EditorInputSource
 from ailingo.input_source.file_source import FileInputSource
 from ailingo.input_source.url_source import UrlInputSource
+from ailingo.output_source import OutputSource
 from ailingo.output_source.console_source import ConsoleOutputSource
 from ailingo.output_source.file_source import FileOutputSource
-from ailingo.translator import DEFAULT_OUTPUT_PATTERN, Translator
+from ailingo.translator import Translator
 from ailingo.utils import setup_logger
 
 app = typer.Typer()
 
 err_console = Console(stderr=True)
 logger = getLogger(__name__)
+
+
+InputMode = Literal["edit", "url", "file"]
+DEFAULT_OUTPUT_PATTERN = "{parent}/{stem}.{target}{suffix}"
 
 
 def _comma_separated_list_callback(value: str) -> list[str]:
@@ -49,6 +54,50 @@ def _validate(
         )
     if file_paths and url:
         raise typer.BadParameter("Cannot specify both file_paths and url.")
+    if not file_paths and not url and not edit:
+        raise typer.BadParameter("No input source specified.")
+
+
+def _get_input_sources(
+    input_mode: InputMode,
+    file_paths: list[Path],
+    url: str | None,
+    quiet: bool,
+) -> list[InputSource]:
+    if input_mode == "edit":
+        return [EditorInputSource()]
+    elif input_mode == "url":
+        return [UrlInputSource(url or "", quiet=quiet)]
+    else:
+        return [FileInputSource(path) for path in file_paths]
+
+
+def _get_output_sources(
+    input_mode: InputMode,
+    input_source: InputSource,
+    output_pattern: str | None,
+    source_language: str | None,
+    target_language: str | None,
+) -> OutputSource:
+    if output_pattern:
+        return FileOutputSource.from_pattern(
+            input_source.path,
+            output_pattern or DEFAULT_OUTPUT_PATTERN,
+            source=source_language,
+            target=target_language,
+        )
+    elif input_mode == "url":
+        return ConsoleOutputSource(markdown=True)
+    elif input_mode == "edit":
+        return ConsoleOutputSource()
+    elif source_language and target_language:
+        # output pattern not specified, but file mode
+        return FileOutputSource.from_replacement(
+            input_source.path, source_language, target_language
+        )
+    else:
+        # otherwise, rewrite original file
+        return FileOutputSource(input_source.path)
 
 
 @app.command()
@@ -140,49 +189,27 @@ def translate(
         url=url,
     )
 
-    console_output: ConsoleOutputSource | None = None
     if edit:
-        logger.debug("Edit mode enabled.")
-        input_sources: list[InputSource] = [EditorInputSource(dryrun=dryrun)]
-        if not output_pattern:
-            console_output = ConsoleOutputSource()
+        input_mode = "edit"
     elif url:
-        logger.debug("URL mode enabled.")
-        input_sources = [UrlInputSource(url, quiet=quiet, dryrun=dryrun)]
-        if not output_pattern:
-            console_output = ConsoleOutputSource(markdown=True)
-        if not request:
-            request = (
-                "Original text is extracted from a website. Convert it to markdown."
-            )
+        input_mode = "url"
     else:
-        input_sources = [FileInputSource(path) for path in file_paths]
-        if target_languages:
-            logger.debug("Normal mode enabled.")
-        else:
-            logger.debug("Rewrite mode enabled.")
+        input_mode = "file"
+    logger.debug(f"{input_mode.capitalize()} mode enabled.")
+
+    input_sources = _get_input_sources(input_mode, file_paths, url, quiet)
+    if input_mode == "url" and not request:
+        request = "Original text is extracted from a website. Convert it to markdown."
 
     for input_source in input_sources:
         for target_language in target_languages or [None]:
-            if console_output:
-                # edit mode or url mode, without output pattern
-                output_source = console_output
-            elif output_pattern:
-                # with output pattern
-                output_source = FileOutputSource.from_pattern(
-                    input_source.path,
-                    output_pattern or DEFAULT_OUTPUT_PATTERN,
-                    source=source_language,
-                    target=target_language,
-                )
-            elif source_language and target_language:
-                # output pattern not specified, but normal mode
-                output_source = FileOutputSource.from_replacement(
-                    input_source.path, source_language, target_language
-                )
-            else:
-                # otherwise, rewrite original file
-                output_source = FileOutputSource(input_source.path)
+            output_source = _get_output_sources(
+                input_mode,
+                input_source,
+                output_pattern,
+                source_language,
+                target_language,
+            )
             translator.translate(
                 input_source=input_source,
                 output_source=output_source,

@@ -8,11 +8,6 @@ import pytest
 from ailingo.input_source.editor_source import EditorInputSource
 
 
-def test_read_dryrun():
-    editor_source = EditorInputSource(dryrun=True)
-    assert editor_source.read() == ""
-
-
 @mock.patch("ailingo.input_source.editor_source._run_editor")
 def test_read(mock_run_editor: MagicMock):
     editor_source = EditorInputSource()

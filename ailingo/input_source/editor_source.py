@@ -12,12 +12,8 @@ err_console = Console(stderr=True)
 @dataclass
 class EditorInputSource:
     path: str = "(temporary file)"
-    dryrun: bool = False
 
     def read(self) -> str:
-        if self.dryrun:
-            return ""
-
         with tempfile.NamedTemporaryFile(mode="w+", suffix=".txt") as f:
             self.path = f.name
             _run_editor(f.name)

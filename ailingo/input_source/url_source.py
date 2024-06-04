@@ -8,16 +8,12 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 class UrlInputSource:
     url: str
     quiet: bool = False
-    dryrun: bool = False
 
     @property
     def path(self) -> str:
         return str(self.url)
 
     def read(self) -> str:
-        if self.dryrun:
-            return ""
-
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
