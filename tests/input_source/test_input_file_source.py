@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from ailingo.input_source.file_source import FileInputSource
 
 
