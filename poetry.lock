@@ -3094,4 +3094,4 @@ google = ["google-cloud-aiplatform", "google-generativeai"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "27f34df356f77012300ff3fc22af0299195c596b772dab8151cf8f8ccf00ed30"
+content-hash = "88fed12944370612ebd850bde39b6ce914ea9bf9cbb7ae70690dd6e55bbf63fa"
