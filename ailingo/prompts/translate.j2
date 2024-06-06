@@ -9,13 +9,14 @@ Please follow the information below for reference:
 {% if source_language %}
 - Source language code: {{ source_language }}
 {% endif %}
+{% if target_language %}
 - Target language code: {{ target_language }}
+{% endif %}
 {% if request %}
 - Additional request: {{ request }}
 {% endif %}
 {% if current_text %}
-Also, some content has been previously translated. 
-Please use the original content as much as possible, and only change and translate the parts 
-that differ from the text provided by the user.
+Some content has been previously translated. 
+Please use the original content as much as possible, and only change and translate the parts that differ from the text provided by the user.
 {{ current_text }}
 {% endif %}

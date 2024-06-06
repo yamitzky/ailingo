@@ -30,7 +30,7 @@ def test_generate_translate_prompt():
     assert "- Source language code: en" in prompt[0]["content"]
     assert "- Target language code: ja" in prompt[0]["content"]
     assert "- Additional request: 翻訳のリクエスト" in prompt[0]["content"]
-    assert "Also, some content has been previously translated." in prompt[0]["content"]
+    assert "Some content has been previously translated." in prompt[0]["content"]
     assert "現在のテキスト" in prompt[0]["content"]
     assert "User provided text:" in prompt[1]["content"]
     assert "Hello, world!" in prompt[1]["content"]
@@ -55,7 +55,7 @@ def test_generate_rewrite_prompt():
     assert "- Source language code: ja" in prompt[0]["content"]
     assert "- Target language code:" not in prompt[0]["content"]
     assert "- Additional request: リライトのリクエスト" in prompt[0]["content"]
-    assert "Also, some content has been previously translated." in prompt[0]["content"]
+    assert "Some content has been previously rewritten." in prompt[0]["content"]
     assert "現在のテキスト" in prompt[0]["content"]
 
     assert "User provided text:" in prompt[1]["content"]
