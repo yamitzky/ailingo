@@ -79,17 +79,18 @@ def _get_output_sources(
     source_language: str | None,
     target_language: str | None,
 ) -> OutputSource:
-    if output_pattern:
+    prefer_markdown = input_mode == "url"
+    if output_pattern == "-":
+        return ConsoleOutputSource(markdown=prefer_markdown)
+    elif output_pattern:
         return FileOutputSource.from_pattern(
             input_source.path,
             output_pattern,
             source=source_language,
             target=target_language,
         )
-    elif input_mode == "url":
-        return ConsoleOutputSource(markdown=True)
-    elif input_mode == "edit":
-        return ConsoleOutputSource()
+    elif input_mode == "url" or input_mode == "edit":
+        return ConsoleOutputSource(markdown=prefer_markdown)
     elif source_language and target_language:
         # output pattern not specified, but file mode (replace {src} with {target})
         return FileOutputSource.from_replacement(
@@ -120,7 +121,7 @@ def translate(
     ] = None,
     source_language: Annotated[
         Optional[str],
-        typer.Option("-s", "--source", help="Source language(Optional)"),
+        typer.Option("-s", "--source", help="Source language (Optional)"),
     ] = None,
     _target_languages: Annotated[
         list,  # list[str] not work
@@ -137,7 +138,7 @@ def translate(
             "-m",
             "--model",
             envvar="AILINGO_MODEL",
-            help="Generative AI model to use for translation(e.g. gpt-4o, gemini-1.5-pro).",
+            help="Generative AI model to use for translation (e.g. gpt-4o, gemini-1.5-pro).",
         ),
     ] = "gpt-4o",
     output_pattern: Annotated[
@@ -151,14 +152,14 @@ def translate(
     ] = None,
     overwrite: Annotated[
         bool,
-        typer.Option("-y", "--yes", help="Skip confirmation before overwriting."),
+        typer.Option("-y", "--yes", help="Skip confirmation before overwriting"),
     ] = False,
     request: Annotated[
         Optional[str],
         typer.Option(
             "-r",
             "--request",
-            help="Add a translation request",
+            help="Add a translation request.",
         ),
     ] = None,
     edit: Annotated[bool, typer.Option("-e", "--edit", help="Edit mode.")] = False,

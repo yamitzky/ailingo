@@ -241,6 +241,25 @@ def test_edit_mode_with_output_file(mock_translator, tmp_path):
 
 
 @patch("ailingo.cli.Translator")
+def test_edit_mode_with_console_output(mock_translator):
+    mock_instance = MagicMock()
+    mock_translator.return_value = mock_instance
+
+    result = runner.invoke(app, ["-e", "-o", "-"])
+    assert result.exit_code == 0
+    mock_instance.translate.assert_called_once_with(
+        input_source=EditorInputSource(),
+        output_source=ConsoleOutputSource(markdown=False),
+        source_language=None,
+        target_language=None,
+        overwrite=False,
+        dryrun=False,
+        request=None,
+        quiet=False,
+    )
+
+
+@patch("ailingo.cli.Translator")
 def test_translate_default_output(mock_translator, tmp_path):
     """Test translating a single file with the default output pattern."""
     mock_instance = MagicMock()
@@ -271,7 +290,37 @@ def test_translate_default_output(mock_translator, tmp_path):
     assert mock_instance.translate.call_count == 1
 
 
-# ... existing code ...
+@patch("ailingo.cli.Translator")
+def test_translate_with_console_output(mock_translator, tmp_path):
+    """Test translating a single file with console output."""
+    mock_instance = MagicMock()
+    mock_translator.return_value = mock_instance
+    with open(tmp_path / "test.txt", "w") as f:
+        f.write("Test content.")
+
+    result = runner.invoke(
+        app,
+        [
+            str(tmp_path / "test.txt"),
+            "-t",
+            "fr",
+            "-o",
+            "-",
+        ],
+    )
+
+    assert result.exit_code == 0
+    mock_instance.translate.assert_called_once_with(
+        input_source=FileInputSource(str(tmp_path / "test.txt")),
+        output_source=ConsoleOutputSource(markdown=False),
+        source_language=None,
+        target_language="fr",
+        overwrite=False,
+        dryrun=False,
+        request=None,
+        quiet=False,
+    )
+    assert mock_instance.translate.call_count == 1
 
 
 def test_translate_invalid_language_option():
