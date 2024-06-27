@@ -323,6 +323,29 @@ def test_translate_with_console_output(mock_translator, tmp_path):
     assert mock_instance.translate.call_count == 1
 
 
+@patch("ailingo.cli.Translator")
+def test_markdown_suffixed_input_file(mock_translator, tmp_path):
+    mock_instance = MagicMock()
+    mock_translator.return_value = mock_instance
+    with open(tmp_path / "test.md", "w") as f:
+        f.write("Test content.")
+
+    result = runner.invoke(app, [str(tmp_path / "test.md"), "-o", "-"])
+
+    assert result.exit_code == 0
+    mock_instance.translate.assert_called_once_with(
+        input_source=FileInputSource(str(tmp_path / "test.md")),
+        output_source=ConsoleOutputSource(markdown=True),
+        source_language=None,
+        target_language=None,
+        overwrite=False,
+        dryrun=False,
+        request=None,
+        quiet=False,
+    )
+    assert mock_instance.translate.call_count == 1
+
+
 def test_translate_invalid_language_option():
     result = runner.invoke(app, ["-e", "-t", "fr,de"])
     assert result.exit_code == 2

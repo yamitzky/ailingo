@@ -79,7 +79,7 @@ def _get_output_sources(
     source_language: str | None,
     target_language: str | None,
 ) -> OutputSource:
-    prefer_markdown = input_mode == "url"
+    prefer_markdown = input_mode == "url" or Path(input_source.path).suffix == ".md"
     if output_pattern == "-":
         return ConsoleOutputSource(markdown=prefer_markdown)
     elif output_pattern:
