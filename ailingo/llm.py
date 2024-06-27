@@ -1,6 +1,7 @@
 from typing import Iterator, cast
 
 import litellm
+from litellm.types.utils import ModelResponse
 
 
 class LLM:
@@ -15,7 +16,7 @@ class LLM:
         else:
             messages = prompt
         response = litellm.completion(model=model, messages=messages, stream=True)
-        return (cast(litellm.ModelResponse, chunk) for chunk in response)
+        return (cast(ModelResponse, chunk) for chunk in response)
 
     def completion(self, prompt: str | list[dict]) -> str:
         chunks = self._completion(self.model_name, prompt)
