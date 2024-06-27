@@ -59,10 +59,9 @@ def test_translate_command(mock_translator, tmp_path):
 
 
 @patch("ailingo.cli.Translator")
-def test_model_name_from_environment_variable(mock_translator, tmp_path, monkeypatch):
+def test_model_name_from_environment_variable(mock_translator, tmp_path):
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
-    monkeypatch.setenv("AILINGO_MODEL", "model-from-env")
 
     with open(tmp_path / "test.txt", "w") as f:
         f.write("Test content.")
@@ -74,11 +73,12 @@ def test_model_name_from_environment_variable(mock_translator, tmp_path, monkeyp
             "-t",
             "fr",
         ],
+        env={"AILINGO_MODEL": "model-from-cli"},
     )
 
     assert result.exit_code == 0
     mock_instance.translate.assert_called_once()
-    mock_translator.assert_called_once_with(model_name="model-from-env")
+    mock_translator.assert_called_once_with(model_name="model-from-cli")
 
 
 @patch("ailingo.cli.Translator")
