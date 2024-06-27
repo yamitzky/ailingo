@@ -131,7 +131,7 @@ def translate(
         typer.Option(
             "-m",
             "--model",
-            envvar="MODEL_NAME",
+            envvar=["MODEL_NAME", "AILINGO_MODEL"],
             help="Generative AI model to use for translation(e.g. gpt-4o, gemini-1.5-pro).",
         ),
     ] = "gpt-4o",
