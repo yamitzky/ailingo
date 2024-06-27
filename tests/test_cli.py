@@ -240,6 +240,40 @@ def test_edit_mode_with_output_file(mock_translator, tmp_path):
     )
 
 
+@patch("ailingo.cli.Translator")
+def test_translate_default_output(mock_translator, tmp_path):
+    """Test translating a single file with the default output pattern."""
+    mock_instance = MagicMock()
+    mock_translator.return_value = mock_instance
+    with open(tmp_path / "test.txt", "w") as f:
+        f.write("Test content.")
+
+    result = runner.invoke(
+        app,
+        [
+            str(tmp_path / "test.txt"),
+            "-t",
+            "fr",
+        ],
+    )
+
+    assert result.exit_code == 0
+    mock_instance.translate.assert_called_once_with(
+        input_source=FileInputSource(str(tmp_path / "test.txt")),
+        output_source=FileOutputSource(str(tmp_path / "test.fr.txt")),
+        source_language=None,
+        target_language="fr",
+        overwrite=False,
+        dryrun=False,
+        request=None,
+        quiet=False,
+    )
+    assert mock_instance.translate.call_count == 1
+
+
+# ... existing code ...
+
+
 def test_translate_invalid_language_option():
     result = runner.invoke(app, ["-e", "-t", "fr,de"])
     assert result.exit_code == 2

@@ -82,7 +82,7 @@ def _get_output_sources(
     if output_pattern:
         return FileOutputSource.from_pattern(
             input_source.path,
-            output_pattern or DEFAULT_OUTPUT_PATTERN,
+            output_pattern,
             source=source_language,
             target=target_language,
         )
@@ -91,12 +91,17 @@ def _get_output_sources(
     elif input_mode == "edit":
         return ConsoleOutputSource()
     elif source_language and target_language:
-        # output pattern not specified, but file mode
+        # output pattern not specified, but file mode (replace {src} with {target})
         return FileOutputSource.from_replacement(
             input_source.path, source_language, target_language
         )
+    elif target_language:
+        # output pattern not specified, but file mode (default pattern)
+        return FileOutputSource.from_pattern(
+            input_source.path, DEFAULT_OUTPUT_PATTERN, target=target_language
+        )
     else:
-        # otherwise, rewrite original file
+        # otherwise, rewrite original file (rewrite mode)
         return FileOutputSource(input_source.path)
 
 
