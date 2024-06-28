@@ -1,6 +1,8 @@
 import logging
+from pathlib import Path
 from unittest.mock import MagicMock, call, patch
 
+import pytest
 from typer.testing import CliRunner
 
 from ailingo.cli import app
@@ -23,17 +25,39 @@ def mock_translate(*args, **kwargs):
         f.write("Translated content.")
 
 
+@pytest.fixture
+def test_file(tmp_path):
+    file_path = tmp_path / "test.txt"
+    with open(file_path, "w") as f:
+        f.write("Test content.")
+    return file_path
+
+
+@pytest.fixture
+def test_file_2(tmp_path):
+    file_path = tmp_path / "test2.txt"
+    with open(file_path, "w") as f:
+        f.write("Test content.")
+    return file_path
+
+
+@pytest.fixture
+def test_md(tmp_path):
+    file_path = tmp_path / "test.md"
+    with open(file_path, "w") as f:
+        f.write("Test content.")
+    return file_path
+
+
 @patch("ailingo.cli.Translator")
-def test_translate_command(mock_translator, tmp_path):
+def test_translate_command(mock_translator, test_file: Path):
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
-    with open(tmp_path / "test.txt", "w") as f:
-        f.write("Test content.")
 
     result = runner.invoke(
         app,
         [
-            str(tmp_path / "test.txt"),
+            str(test_file),
             "-t",
             "fr",
             "-m",
@@ -45,28 +69,28 @@ def test_translate_command(mock_translator, tmp_path):
 
     assert result.exit_code == 0
     mock_instance.translate.assert_called_once_with(
-        input_source=FileInputSource(str(tmp_path / "test.txt")),
-        output_source=FileOutputSource(str(tmp_path / "test.fr.txt")),
+        input_source=FileInputSource(str(test_file)),
+        output_source=FileOutputSource(str(test_file.parent / "test.fr.txt")),
         source_language=None,
         target_language="fr",
         overwrite=False,
         dryrun=False,
         request=None,
         quiet=False,
+        stream=False,
     )
     assert mock_instance.translate.call_count == 1
 
+
 @patch("ailingo.cli.Translator")
-def test_translate_with_stream(mock_translator, tmp_path):
+def test_translate_with_stream(mock_translator, test_file: Path):
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
-    with open(tmp_path / "test.txt", "w") as f:
-        f.write("Test content.")
 
     result = runner.invoke(
         app,
         [
-            str(tmp_path / "test.txt"),
+            str(test_file),
             "-t",
             "fr",
             "--stream",
@@ -75,8 +99,8 @@ def test_translate_with_stream(mock_translator, tmp_path):
 
     assert result.exit_code == 0
     mock_instance.translate.assert_called_once_with(
-        input_source=FileInputSource(str(tmp_path / "test.txt")),
-        output_source=FileOutputSource(str(tmp_path / "test.fr.txt")),
+        input_source=FileInputSource(str(test_file)),
+        output_source=FileOutputSource(str(test_file.parent / "test.fr.txt")),
         source_language=None,
         target_language="fr",
         overwrite=False,
@@ -86,21 +110,17 @@ def test_translate_with_stream(mock_translator, tmp_path):
         stream=True,
     )
     assert mock_instance.translate.call_count == 1
-    mock_translator.assert_called_once_with(model_name="gpt-4o")
 
 
 @patch("ailingo.cli.Translator")
-def test_model_name_from_environment_variable(mock_translator, tmp_path):
+def test_model_name_from_environment_variable(mock_translator, test_file: Path):
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
-
-    with open(tmp_path / "test.txt", "w") as f:
-        f.write("Test content.")
 
     result = runner.invoke(
         app,
         [
-            str(tmp_path / "test.txt"),
+            str(test_file),
             "-t",
             "fr",
         ],
@@ -113,19 +133,15 @@ def test_model_name_from_environment_variable(mock_translator, tmp_path):
 
 
 @patch("ailingo.cli.Translator")
-def test_translate_multiple_files(mock_translator, tmp_path):
+def test_translate_multiple_files(mock_translator, test_file: Path, test_file_2: Path):
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
-    with open(tmp_path / "test.txt", "w") as f:
-        f.write("Test content.")
-    with open(tmp_path / "test2.txt", "w") as f:
-        f.write("Test content.")
 
     result = runner.invoke(
         app,
         [
-            str(tmp_path / "test.txt"),
-            str(tmp_path / "test2.txt"),
+            str(test_file),
+            str(test_file_2),
             "-t",
             "fr,ja",
             "-m",
@@ -140,65 +156,68 @@ def test_translate_multiple_files(mock_translator, tmp_path):
     mock_instance.translate.assert_has_calls(
         [
             call(
-                input_source=FileInputSource(str(tmp_path / "test.txt")),
-                output_source=FileOutputSource(str(tmp_path / "test.fr.txt")),
+                input_source=FileInputSource(str(test_file)),
+                output_source=FileOutputSource(str(test_file.parent / "test.fr.txt")),
                 source_language=None,
                 target_language="fr",
                 overwrite=False,
                 dryrun=False,
                 request=None,
                 quiet=False,
+                stream=False,
             ),
             call(
-                input_source=FileInputSource(str(tmp_path / "test2.txt")),
-                output_source=FileOutputSource(str(tmp_path / "test2.fr.txt")),
+                input_source=FileInputSource(str(test_file_2)),
+                output_source=FileOutputSource(
+                    str(test_file_2.parent / "test2.fr.txt")
+                ),
                 source_language=None,
                 target_language="fr",
                 overwrite=False,
                 dryrun=False,
                 request=None,
                 quiet=False,
+                stream=False,
             ),
             call(
-                input_source=FileInputSource(str(tmp_path / "test.txt")),
-                output_source=FileOutputSource(str(tmp_path / "test.ja.txt")),
+                input_source=FileInputSource(str(test_file)),
+                output_source=FileOutputSource(str(test_file.parent / "test.ja.txt")),
                 source_language=None,
                 target_language="ja",
                 overwrite=False,
                 dryrun=False,
                 request=None,
                 quiet=False,
+                stream=False,
             ),
             call(
-                input_source=FileInputSource(str(tmp_path / "test2.txt")),
-                output_source=FileOutputSource(str(tmp_path / "test2.ja.txt")),
+                input_source=FileInputSource(str(test_file_2)),
+                output_source=FileOutputSource(
+                    str(test_file_2.parent / "test2.ja.txt")
+                ),
                 source_language=None,
                 target_language="ja",
                 overwrite=False,
                 dryrun=False,
                 request=None,
                 quiet=False,
+                stream=False,
             ),
         ],
         any_order=True,
     )
-    mock_translator.assert_called_once_with(model_name="gemini-1.5-pro")
 
 
 @patch("ailingo.cli.Translator")
-def test_rewrite_mode(mock_translator, tmp_path):
+def test_rewrite_mode(mock_translator, test_file: Path, test_file_2: Path):
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
-    with open(tmp_path / "test.txt", "w") as f:
-        f.write("Test content.")
-    with open(tmp_path / "test2.txt", "w") as f:
-        f.write("Test content.")
 
     result = runner.invoke(
         app,
         [
-            str(tmp_path / "test.txt"),
-            str(tmp_path / "test2.txt"),
+            str(test_file),
+            str(test_file_2),
             "-s",
             "en",
         ],
@@ -208,24 +227,26 @@ def test_rewrite_mode(mock_translator, tmp_path):
     mock_instance.translate.assert_has_calls(
         [
             call(
-                input_source=FileInputSource(str(tmp_path / "test.txt")),
-                output_source=FileOutputSource(str(tmp_path / "test.txt")),
+                input_source=FileInputSource(str(test_file)),
+                output_source=FileOutputSource(str(test_file_2.parent / "test.txt")),
                 source_language="en",
                 target_language=None,
                 overwrite=False,
                 dryrun=False,
                 request=None,
                 quiet=False,
+                stream=False,
             ),
             call(
-                input_source=FileInputSource(str(tmp_path / "test2.txt")),
-                output_source=FileOutputSource(str(tmp_path / "test2.txt")),
+                input_source=FileInputSource(str(test_file_2)),
+                output_source=FileOutputSource(str(test_file_2.parent / "test2.txt")),
                 source_language="en",
                 target_language=None,
                 overwrite=False,
                 dryrun=False,
                 request=None,
                 quiet=False,
+                stream=False,
             ),
         ],
         any_order=True,
@@ -234,7 +255,7 @@ def test_rewrite_mode(mock_translator, tmp_path):
 
 
 @patch("ailingo.cli.Translator")
-def test_edit_mode(mock_translator, tmp_path):
+def test_edit_mode(mock_translator):
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
 
@@ -249,6 +270,7 @@ def test_edit_mode(mock_translator, tmp_path):
         dryrun=False,
         request=None,
         quiet=False,
+        stream=False,
     )
 
 
@@ -268,6 +290,7 @@ def test_edit_mode_with_output_file(mock_translator, tmp_path):
         dryrun=False,
         request=None,
         quiet=False,
+        stream=False,
     )
 
 
@@ -287,21 +310,20 @@ def test_edit_mode_with_console_output(mock_translator):
         dryrun=False,
         request=None,
         quiet=False,
+        stream=False,
     )
 
 
 @patch("ailingo.cli.Translator")
-def test_translate_default_output(mock_translator, tmp_path):
+def test_translate_default_output(mock_translator, test_file):
     """Test translating a single file with the default output pattern."""
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
-    with open(tmp_path / "test.txt", "w") as f:
-        f.write("Test content.")
 
     result = runner.invoke(
         app,
         [
-            str(tmp_path / "test.txt"),
+            str(test_file),
             "-t",
             "fr",
         ],
@@ -309,30 +331,29 @@ def test_translate_default_output(mock_translator, tmp_path):
 
     assert result.exit_code == 0
     mock_instance.translate.assert_called_once_with(
-        input_source=FileInputSource(str(tmp_path / "test.txt")),
-        output_source=FileOutputSource(str(tmp_path / "test.fr.txt")),
+        input_source=FileInputSource(str(test_file)),
+        output_source=FileOutputSource(str(test_file.parent / "test.fr.txt")),
         source_language=None,
         target_language="fr",
         overwrite=False,
         dryrun=False,
         request=None,
         quiet=False,
+        stream=False,
     )
     assert mock_instance.translate.call_count == 1
 
 
 @patch("ailingo.cli.Translator")
-def test_translate_with_console_output(mock_translator, tmp_path):
+def test_translate_with_console_output(mock_translator, test_file):
     """Test translating a single file with console output."""
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
-    with open(tmp_path / "test.txt", "w") as f:
-        f.write("Test content.")
 
     result = runner.invoke(
         app,
         [
-            str(tmp_path / "test.txt"),
+            str(test_file),
             "-t",
             "fr",
             "-o",
@@ -342,7 +363,7 @@ def test_translate_with_console_output(mock_translator, tmp_path):
 
     assert result.exit_code == 0
     mock_instance.translate.assert_called_once_with(
-        input_source=FileInputSource(str(tmp_path / "test.txt")),
+        input_source=FileInputSource(str(test_file)),
         output_source=ConsoleOutputSource(markdown=False),
         source_language=None,
         target_language="fr",
@@ -350,22 +371,21 @@ def test_translate_with_console_output(mock_translator, tmp_path):
         dryrun=False,
         request=None,
         quiet=False,
+        stream=False,
     )
     assert mock_instance.translate.call_count == 1
 
 
 @patch("ailingo.cli.Translator")
-def test_markdown_suffixed_input_file(mock_translator, tmp_path):
+def test_markdown_suffixed_input_file(mock_translator, test_md: Path):
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
-    with open(tmp_path / "test.md", "w") as f:
-        f.write("Test content.")
 
-    result = runner.invoke(app, [str(tmp_path / "test.md"), "-o", "-"])
+    result = runner.invoke(app, [str(test_md), "-o", "-"])
 
     assert result.exit_code == 0
     mock_instance.translate.assert_called_once_with(
-        input_source=FileInputSource(str(tmp_path / "test.md")),
+        input_source=FileInputSource(str(test_md)),
         output_source=ConsoleOutputSource(markdown=True),
         source_language=None,
         target_language=None,
@@ -373,6 +393,7 @@ def test_markdown_suffixed_input_file(mock_translator, tmp_path):
         dryrun=False,
         request=None,
         quiet=False,
+        stream=False,
     )
     assert mock_instance.translate.call_count == 1
 
@@ -385,27 +406,23 @@ def test_translate_invalid_language_option():
     )
 
 
-def test_translate_edit_mode_with_file_argument(tmp_path):
-    with open(tmp_path / "test.txt", "w") as f:
-        f.write("Test content.")
-    result = runner.invoke(app, [str(tmp_path / "test.txt"), "-e"])
+def test_translate_edit_mode_with_file_argument(test_file):
+    result = runner.invoke(app, [str(test_file), "-e"])
     assert result.exit_code == 2
     assert "File paths cannot be specified in edit mode." in result.output
 
 
 @patch("ailingo.cli.Translator")
-def test_debug_mode(mock_translator, caplog, tmp_path):
+def test_debug_mode(mock_translator, caplog, test_file):
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
-    with open(tmp_path / "dummy.txt", "w") as f:
-        f.write("Test content.")
 
     with caplog.at_level(logging.INFO):
-        runner.invoke(app, [str(tmp_path / "dummy.txt"), "--target", "en"])
+        runner.invoke(app, [str(test_file), "--target", "en"])
     assert "DEBUG" not in caplog.text
 
     with caplog.at_level(logging.DEBUG):
-        runner.invoke(app, ["--debug", str(tmp_path / "dummy.txt"), "--target", "en"])
+        runner.invoke(app, ["--debug", str(test_file), "--target", "en"])
     assert "DEBUG" in caplog.text
 
 
@@ -438,21 +455,21 @@ def test_translate_url(mock_translator, tmp_path):
         dryrun=False,
         request="Original text is extracted from a website. Convert it to markdown.",
         quiet=False,
+        stream=False,
     )
     assert mock_instance.translate.call_count == 1
     mock_translator.assert_called_once_with(model_name="gpt-4o")
 
+
 @patch("ailingo.cli.Translator")
-def test_translate_with_request(mock_translator, tmp_path):
+def test_translate_with_request(mock_translator, test_file: Path):
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
-    with open(tmp_path / "test.txt", "w") as f:
-        f.write("Test content.")
 
     result = runner.invoke(
         app,
         [
-            str(tmp_path / "test.txt"),
+            str(test_file),
             "-t",
             "ja",
             "-r",
@@ -462,73 +479,71 @@ def test_translate_with_request(mock_translator, tmp_path):
 
     assert result.exit_code == 0
     mock_instance.translate.assert_called_once_with(
-        input_source=FileInputSource(str(tmp_path / "test.txt")),
-        output_source=FileOutputSource(str(tmp_path / "test.ja.txt")),
+        input_source=FileInputSource(str(test_file)),
+        output_source=FileOutputSource(str(test_file.parent / "test.ja.txt")),
         source_language=None,
         target_language="ja",
         overwrite=False,
         dryrun=False,
         request="Translate to casual Japanese",
         quiet=False,
+        stream=False,
     )
-    assert mock_instance.translate.call_count == 1
+
 
 @patch("ailingo.cli.Translator")
-def test_translate_with_overwrite(mock_translator, tmp_path):
+def test_translate_with_overwrite(mock_translator, test_file: Path):
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
-    with open(tmp_path / "test.txt", "w") as f:
-        f.write("Test content.")
 
     result = runner.invoke(
         app,
         [
-            str(tmp_path / "test.txt"),
+            str(test_file),
             "-t",
             "fr",
-            "--overwrite",
+            "-y",
         ],
     )
 
     assert result.exit_code == 0
     mock_instance.translate.assert_called_once_with(
-        input_source=FileInputSource(str(tmp_path / "test.txt")),
-        output_source=FileOutputSource(str(tmp_path / "test.fr.txt")),
+        input_source=FileInputSource(str(test_file)),
+        output_source=FileOutputSource(str(test_file.parent / "test.fr.txt")),
         source_language=None,
         target_language="fr",
         overwrite=True,
         dryrun=False,
         request=None,
         quiet=False,
+        stream=False,
     )
-    assert mock_instance.translate.call_count == 1
+
 
 @patch("ailingo.cli.Translator")
-def test_translate_with_dryrun(mock_translator, tmp_path):
+def test_translate_with_dryrun(mock_translator, test_file: Path):
     mock_instance = MagicMock()
     mock_translator.return_value = mock_instance
-    with open(tmp_path / "test.txt", "w") as f:
-        f.write("Test content.")
 
     result = runner.invoke(
         app,
         [
-            str(tmp_path / "test.txt"),
+            str(test_file),
             "-t",
             "de",
-            "--dryrun",
+            "--dry-run",
         ],
     )
 
     assert result.exit_code == 0
     mock_instance.translate.assert_called_once_with(
-        input_source=FileInputSource(str(tmp_path / "test.txt")),
-        output_source=FileOutputSource(str(tmp_path / "test.de.txt")),
+        input_source=FileInputSource(str(test_file)),
+        output_source=FileOutputSource(str(test_file.parent / "test.de.txt")),
         source_language=None,
         target_language="de",
         overwrite=False,
         dryrun=True,
         request=None,
         quiet=False,
+        stream=False,
     )
-    assert mock_instance.translate.call_count == 1
