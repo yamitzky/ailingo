@@ -46,7 +46,7 @@ def test_translate_dryrun(
         dryrun=True,
     )
 
-    mock_llm.completion.assert_not_called()
+    mock_llm.iter_completion.assert_not_called()
     mock_input_source.read.assert_not_called()
     mock_output_source.write.assert_not_called()
 
@@ -62,7 +62,7 @@ def test_translate_new_file(
     mock_output_source.path = "test.fr.txt"
     mock_output_source.exists.return_value = False
     mock_input_source.read.return_value = "Hello, world!"
-    mock_llm.completion.return_value = "Bonjour, le monde!"
+    mock_llm.iter_completion.return_value = ["Bonjour, le monde!"]
     mock_prompt.build.return_value = [
         {"role": "system", "content": "You are a translator that translates files."},
         {"role": "user", "content": "User provided text:\n----------\nHello, world!"},
@@ -75,7 +75,7 @@ def test_translate_new_file(
         overwrite=False,
     )
 
-    mock_llm.completion.assert_called_once_with(mock_prompt.build.return_value)
+    mock_llm.iter_completion.assert_called_once_with(mock_prompt.build.return_value)
     mock_prompt.build.assert_called_once_with(
         input_path="test.txt",
         input_text="Hello, world!",
@@ -98,7 +98,7 @@ def test_translate_with_source(
     mock_output_source.path = "test.fr.txt"
     mock_output_source.exists.return_value = False
     mock_input_source.read.return_value = "Hello, world!"
-    mock_llm.completion.return_value = "Bonjour, le monde!"
+    mock_llm.iter_completion.return_value = ["Bonjour, le monde!"]
     mock_prompt.build.return_value = [
         {"role": "system", "content": "You are a translator that translates files."},
         {"role": "user", "content": "User provided text:\n----------\nHello, world!"},
@@ -112,7 +112,7 @@ def test_translate_with_source(
         overwrite=False,
     )
 
-    mock_llm.completion.assert_called_once_with(mock_prompt.build.return_value)
+    mock_llm.iter_completion.assert_called_once_with(mock_prompt.build.return_value)
     mock_prompt.build.assert_called_once_with(
         input_path="test.txt",
         input_text="Hello, world!",
@@ -139,7 +139,7 @@ def test_translate_no_overwrite(
             overwrite=False,
         )
 
-    mock_llm.completion.assert_not_called()
+    mock_llm.iter_completion.assert_not_called()
     mock_input_source.read.assert_not_called()
     mock_output_source.write.assert_not_called()
 
@@ -152,7 +152,7 @@ def test_translate_overwrite(
     mock_output_source.exists.return_value = True
     mock_input_source.read.return_value = "Hello, world!"
     mock_output_source.read.return_value = "Bonjour, le monde(existing file)"
-    mock_llm.completion.return_value = "Bonjour, le monde!"
+    mock_llm.iter_completion.return_value = ["Bonjour, le monde!"]
     mock_prompt.build.return_value = [
         {"role": "system", "content": "You are a translator that translates files."},
         {"role": "user", "content": "User provided text:\n----------\nHello, world!"},
@@ -167,7 +167,7 @@ def test_translate_overwrite(
 
     mock_input_source.read.assert_called_once_with()
     mock_output_source.read.assert_called_once_with()
-    mock_llm.completion.assert_called_once_with(mock_prompt.build.return_value)
+    mock_llm.iter_completion.assert_called_once_with(mock_prompt.build.return_value)
     mock_prompt.build.assert_called_once_with(
         input_path="test.txt",
         input_text="Hello, world!",
@@ -186,7 +186,7 @@ def test_translate_with_request(
     mock_output_source.path = "test.fr.txt"
     mock_output_source.exists.return_value = False
     mock_input_source.read.return_value = "Hello, world!"
-    mock_llm.completion.return_value = "Bonjour, world!"
+    mock_llm.iter_completion.return_value = ["Bonjour, world!"]
     mock_prompt.build.return_value = [
         {"role": "system", "content": "You are a translator that translates files."},
         {"role": "user", "content": "User provided text:\n----------\nHello, world!"},
@@ -200,7 +200,7 @@ def test_translate_with_request(
         request="Do not translate the word 'world'.",
     )
 
-    mock_llm.completion.assert_called_once_with(mock_prompt.build.return_value)
+    mock_llm.iter_completion.assert_called_once_with(mock_prompt.build.return_value)
     mock_prompt.build.assert_called_once_with(
         input_path="test.txt",
         input_text="Hello, world!",
@@ -220,7 +220,7 @@ def test_rewrite(
     mock_output_source.exists.return_value = True
     mock_input_source.read.return_value = "Hello, world!"
     mock_output_source.read.return_value = "Hi, world!"
-    mock_llm.completion.return_value = "HELLO, WORLD!"
+    mock_llm.iter_completion.return_value = ["HELLO, WORLD!"]
     mock_prompt.build.return_value = [
         {"role": "system", "content": "You are a writer who rewrites text."},
         {"role": "user", "content": "User provided text:\n----------\nHello, world!"},
@@ -232,7 +232,7 @@ def test_rewrite(
         overwrite=True,
     )
 
-    mock_llm.completion.assert_called_once_with(mock_prompt.build.return_value)
+    mock_llm.iter_completion.assert_called_once_with(mock_prompt.build.return_value)
     mock_prompt.build.assert_called_once_with(
         input_path="test.txt",
         input_text="Hello, world!",
@@ -242,3 +242,42 @@ def test_rewrite(
         current_text="Hi, world!",
     )
     mock_output_source.write.assert_called_once_with("HELLO, WORLD!")
+
+
+def test_translate_with_streaming(
+    translator: Translator,
+    mock_llm,
+    mock_input_source,
+    mock_output_source,
+    mock_prompt,
+):
+    mock_input_source.path = "test.txt"
+    mock_output_source.path = "test.fr.txt"
+    mock_output_source.exists.return_value = False
+    mock_input_source.read.return_value = "Hello, world!"
+    mock_llm.iter_completion.return_value = iter(["Bonjour", ", ", "le ", "monde", "!"])
+    mock_prompt.build.return_value = [
+        {"role": "system", "content": "You are a translator that translates files."},
+        {"role": "user", "content": "User provided text:\n----------\nHello, world!"},
+    ]
+
+    translator.translate(
+        input_source=mock_input_source,
+        output_source=mock_output_source,
+        target_language="fr",
+        overwrite=False,
+        stream=True,
+    )
+
+    mock_llm.iter_completion.assert_called_once_with(mock_prompt.build.return_value)
+    mock_prompt.build.assert_called_once_with(
+        input_path="test.txt",
+        input_text="Hello, world!",
+        source_language=None,
+        target_language="fr",
+        request=None,
+        current_text=None,
+    )
+    mock_output_source.write_stream.assert_called_once_with(
+        mock_llm.iter_completion.return_value
+    )
