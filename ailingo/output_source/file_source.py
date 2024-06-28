@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Iterable
 
 
 @dataclass
@@ -11,6 +12,11 @@ class FileOutputSource:
 
     def write(self, text: str):
         Path(self.path).write_text(text)
+
+    def write_stream(self, text: Iterable[str]):
+        with Path(self.path).open("w") as f:
+            for chunk in text:
+                f.write(chunk)
 
     def read(self) -> str:
         return Path(self.path).read_text()

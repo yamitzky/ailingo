@@ -1,8 +1,10 @@
-from typing import Protocol
+from typing import Iterable, Protocol
 
 
 class OutputSource(Protocol):
     def write(self, text: str): ...
+
+    def write_stream(self, text: Iterable[str]): ...
 
     def read(self) -> str: ...
 

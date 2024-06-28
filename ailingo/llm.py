@@ -26,4 +26,6 @@ class LLM:
     def iter_completion(self, prompt: str | list[dict]) -> Iterator[str]:
         chunks = self._completion(self.model_name, prompt)
         for chunk in chunks:
-            yield chunk.choices[0].delta.content  # type: ignore
+            content = chunk.choices[0].delta.content  # type: ignore
+            if content is not None:
+                yield content

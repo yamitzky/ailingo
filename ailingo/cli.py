@@ -171,6 +171,13 @@ def translate(
         bool, typer.Option("-q", "--quiet", help="Suppress all output messages.")
     ] = False,
     debug: Annotated[bool, typer.Option("--debug", help="Enable debug mode.")] = False,
+    stream: Annotated[
+        Optional[bool],
+        typer.Option(
+            "--stream",
+            help="Enable/disable streaming output. Default is not streaming. (Experimental)",
+        ),
+    ] = False,
 ) -> None:
     """
     Translates the specified files.
@@ -225,6 +232,7 @@ def translate(
                 dryrun=dryrun,
                 request=request,
                 quiet=quiet,
+                stream=stream,
             )
 
 

@@ -1,4 +1,5 @@
 from logging import getLogger
+from typing import Iterator
 
 from rich import print
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -33,6 +34,7 @@ class Translator:
         dryrun: bool = False,
         request: str | None = None,
         quiet: bool = False,
+        stream: bool | None = None,
     ) -> None:
         """
         Reads the specified file, performs translation, and saves the result.
@@ -87,12 +89,16 @@ class Translator:
                 request=request,
             )
 
+        if stream:
+            output_source.write_stream(translated_text)
+        else:
+            output_source.write("".join(translated_text))
+
         if not quiet:
             print(
                 f":white_check_mark: [bold green]Translated![/bold green] "
                 f"[bright_black]{output_source.path}[/bright_black]"
             )
-        output_source.write(translated_text)
 
     def _translate_text(
         self,
@@ -102,7 +108,7 @@ class Translator:
         source_language: str | None,
         target_language: str | None,
         request: str | None,
-    ) -> str:
+    ) -> Iterator[str]:
         """
         Translates the specified text into the specified language using LLM.
         """
@@ -116,5 +122,5 @@ class Translator:
         )
         logger.debug(f"Model: {self.model_name}")
         logger.debug(f"Prompt: {prompt}")
-        response = self.llm.completion(prompt)
+        response = self.llm.iter_completion(prompt)
         return response
