@@ -170,6 +170,15 @@ ailingo my_document.txt --target de --model gemini-1.5-pro
 
 Esto traducirá `my_document.txt` al alemán usando Google Gemini Pro.
 
+### Salida en streaming (experimental)
+
+```bash
+ailingo my_document.txt --target ja --stream
+```
+
+La opción `--stream` muestra el resultado de la traducción en tiempo real. La salida en streaming está deshabilitada de forma predeterminada.
+
+
 ### Personalizando el nombre del archivo de salida:
 
 ```bash

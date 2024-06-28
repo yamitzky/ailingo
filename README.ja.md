@@ -169,6 +169,14 @@ ailingo my_document.txt --target de --model gemini-1.5-pro
 
 これは `my_document.txt` をGoogle Gemini Proを使用してドイツ語に翻訳します。
 
+### ストリーミング出力(Experimental)
+
+```bash
+ailingo my_document.txt --target ja --stream
+```
+
+`--stream` オプションを使用すると、翻訳結果をリアルタイムで表示します。デフォルトではストリーミング出力が無効になっています。
+
 ### 出力ファイル名のカスタマイズ:
 
 ```bash

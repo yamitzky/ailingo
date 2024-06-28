@@ -1,4 +1,3 @@
-----------
 # ailingo：使用生成式 AI (LLM) 的本地檔案翻譯 CLI 工具
 
 **ailingo** 是一款使用生成式 AI 將本地檔案翻譯成各種語言的命令列介面 (CLI) 工具。
@@ -20,7 +19,7 @@
   <a href="./README.es.md">Español</a>
 </p>
 
-NOTICE: 本文件是使用Ailingo自動生成的。
+NOTICE: 本文件是使用 Ailingo 自動生成的。
 
 ## 概述
 
@@ -171,6 +170,15 @@ ailingo my_document.txt --target de --model gemini-1.5-pro
 
 這會使用 Google Gemini Pro 將 `my_document.txt` 翻譯成德文。
 
+###  **--stream** 選項 (實驗性功能)
+
+`--stream` 選項允許您以實時方式觀看翻譯的輸出。此功能仍處於實驗階段，並非所有模型都支援。
+
+```bash
+ailingo my_document.txt --target ja --stream
+```
+
+
 ### 自訂輸出檔名：
 
 ```bash
@@ -208,7 +216,7 @@ ailingo /path/to/en/my_document.txt --target ja --output "{parents[1]}/{target}/
 ailingo --help
 ```
 
-## 授權
+### 授權
 
 本專案以 MIT 授權條款發布。
 
